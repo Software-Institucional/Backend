@@ -9,6 +9,9 @@ import { PrismaUserRepository } from 'src/infrastructure/repositories/auth/prism
 import { S3Module } from 'src/infrastructure/s3/s3.module';
 import { NestJsJwtService } from 'src/infrastructure/services/nest-jwt.service';
 import { SchoolController } from 'src/interfaces/controllers/school.controller';
+import { SearchSchoolUseCase } from 'src/application/use-case/school/search-school.use-case';
+import { UpdateSchoolRequestDto } from 'src/application/dtos/school.dtos';
+import { UpdateSchoolUseCase } from 'src/application/use-case/school/update-school.use-case';
 
 @Module({
   imports: [
@@ -27,6 +30,10 @@ import { SchoolController } from 'src/interfaces/controllers/school.controller';
   providers: [
     ConfigService,
     CreateSchoolUseCase,
+    SearchSchoolUseCase,
+    UpdateSchoolUseCase,
+    UpdateSchoolRequestDto,
+
     {
       provide: 'JwtService',
       useClass: NestJsJwtService,

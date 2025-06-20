@@ -48,6 +48,10 @@ export class LoginUseCase {
       );
     }
 
+    if (request.schoolId !== user.schoolId) {
+      throw new BadRequestException('No tienes acceso a esta Escuela');
+    }
+
     // Generate tokens
     const payload = { sub: user.id, email: user.email };
     const accessToken = this.jwtService.generateAccessToken(payload);

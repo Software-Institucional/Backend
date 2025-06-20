@@ -3,24 +3,36 @@ import { JwtPayload } from 'src/domain/interfaces/jwt-payload.interface';
 
 export class CreateSchoolRequestDto {
   user: JwtPayload;
-  @ApiProperty()
+  @ApiProperty({ example: 'Escuela Nacional de Ciencias' })
   name: string;
-  @ApiProperty()
+  @ApiProperty({ example: 'Calle 123, Barrio Centro' })
   address: string;
-  @ApiProperty()
+  @ApiProperty({ example: '+50498765432' })
   phone: string;
-  @ApiProperty()
+  @ApiProperty({ example: 'Francisco Morazán' })
   department: string;
-  @ApiProperty()
+  @ApiProperty({ example: 'Tegucigalpa' })
   municipality: string;
-  @ApiProperty()
+  @ApiProperty({ example: 'escuela@email.com' })
   mail: string;
-  @ApiProperty()
+  @ApiProperty({ example: 'https://www.escuela.edu.hn' })
   website: string;
 }
 
 export class CreateSchoolResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    example: {
+      id: '1',
+      name: 'Escuela Nacional de Ciencias',
+      address: 'Calle 123, Barrio Centro',
+      phone: '+50498765432',
+      imgUrl: 'https://s3.amazonaws.com/bucket/escuela.jpg',
+      department: 'Francisco Morazán',
+      municipality: 'Tegucigalpa',
+      mail: 'escuela@email.com',
+      website: 'https://www.escuela.edu.hn',
+    },
+  })
   school: {
     id: string;
     name: string;
@@ -32,4 +44,33 @@ export class CreateSchoolResponseDto {
     mail: string;
     website: string;
   };
+}
+
+export class SearchSchoolRequestDto {
+  @ApiProperty({ example: 'Escuela Nacional de Ciencias' })
+  name: string;
+  @ApiProperty({ example: '1' })
+  page: number;
+  @ApiProperty({ example: '10' })
+  limit: number;
+}
+
+export class UpdateSchoolRequestDto {
+  @ApiProperty({ example: '' })
+  id: string;
+  user: JwtPayload;
+  @ApiProperty({ example: 'Escuela Nacional de Ciencias', required: false })
+  name?: string;
+  @ApiProperty({ example: 'Calle 123, Barrio Centro', required: false })
+  address?: string;
+  @ApiProperty({ example: '+50498765432', required: false })
+  phone?: string;
+  @ApiProperty({ example: 'Francisco Morazán', required: false })
+  department?: string;
+  @ApiProperty({ example: 'Tegucigalpa', required: false })
+  municipality?: string;
+  @ApiProperty({ example: 'escuela@email.com', required: false })
+  mail?: string;
+  @ApiProperty({ example: 'https://www.escuela.edu.hn', required: false })
+  website?: string;
 }

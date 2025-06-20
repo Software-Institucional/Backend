@@ -14,6 +14,8 @@ export class ForgotPasswordResponseDto {
 }
 
 export class LoginRequestDto {
+  @ApiProperty({ example: '1' })
+  schoolId?: string;
   @ApiProperty({ example: 'usuario@email.com' })
   email: string;
   @ApiProperty({ example: 'password123' })
