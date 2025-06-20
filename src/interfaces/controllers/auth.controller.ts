@@ -155,7 +155,7 @@ export class AuthController {
     return this.resetPasswordUseCase.execute(request);
   }
 
-  @Post('logout')
+  @Get('logout')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Logout user' })
   @ApiResponse({
