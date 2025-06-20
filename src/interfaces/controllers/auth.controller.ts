@@ -4,33 +4,24 @@ import {
   Body,
   HttpCode,
   HttpStatus,
-  UseGuards,
   Res,
   Get,
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiBody,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { ForgotPasswordUseCase } from 'src/application/use-case/auth/forgot-password.use-case';
 import { LoginUseCase } from 'src/application/use-case/auth/login.use-case';
 import { LogoutUseCase } from 'src/application/use-case/auth/logout.use-case';
 import { RefreshTokenUseCase } from 'src/application/use-case/auth/refresh-token.use-case';
 import { RegisterUseCase } from 'src/application/use-case/auth/register.use-case';
 import { ResetPasswordUseCase } from 'src/application/use-case/auth/reset-password.use-case';
-import { JwtAuthGuard } from 'src/infrastructure/guards/jwt.auth.guard';
 import { Response } from 'express';
 import {
   ForgotPasswordRequestDto,
   ForgotPasswordResponseDto,
   LoginRequestDto,
   LoginResponseDto,
-  LogoutRequestDto,
   LogoutResponseDto,
   RefreshTokenResponseDto,
   RegisterRequestDto,
@@ -165,17 +156,31 @@ export class AuthController {
   }
 
   @Post('logout')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Logout user' })
-  @ApiBody({ type: LogoutRequestDto })
   @ApiResponse({
     status: 200,
     description: 'Logout successful',
     type: LogoutResponseDto,
   })
-  async logout(@Body() request: LogoutRequestDto) {
-    return this.logoutUseCase.execute(request);
+  async logout(
+    @Req() req: RequestWithCookies,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<LogoutResponseDto> {
+    const { refreshToken } = req.cookies;
+
+    if (!refreshToken) {
+      // Si no hay token, no hay nada que hacer.
+      return { message: 'No active session to log out from.' };
+    }
+
+    // Invalida el token en la base de datos
+    await this.logoutUseCase.execute({ refreshToken });
+
+    // Limpia las cookies del navegador
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+
+    return { message: 'Logged out successfully' };
   }
 }
