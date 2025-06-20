@@ -6,6 +6,9 @@ import {
   HttpStatus,
   UseGuards,
   Res,
+  Get,
+  Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -29,13 +32,13 @@ import {
   LoginResponseDto,
   LogoutRequestDto,
   LogoutResponseDto,
-  RefreshTokenRequestDto,
   RefreshTokenResponseDto,
   RegisterRequestDto,
   RegisterResponseDto,
   ResetPasswordRequestDto,
   ResetPasswordResponseDto,
 } from 'src/application/dtos/user.dtos';
+import { RequestWithCookies } from 'src/types/express';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -93,18 +96,45 @@ export class AuthController {
     return result;
   }
 
-  @Post('refresh')
+  @Get('refresh')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh access token' })
-  @ApiBody({ type: RefreshTokenRequestDto })
   @ApiResponse({
     status: 200,
     description: 'Token refreshed successfully',
     type: RefreshTokenResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
-  async refresh(@Body() request: RefreshTokenRequestDto) {
-    return this.refreshTokenUseCase.execute(request);
+  async refresh(
+    @Req() req: RequestWithCookies,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const refreshToken = req.cookies?.refreshToken;
+
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token not found in cookies');
+    }
+
+    const result = await this.refreshTokenUseCase.execute({
+      refreshToken,
+    });
+
+    // Opcional: puedes volver a refrescar las cookies si quieres
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+    });
+
+    res.cookie('accessToken', result.accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 35 * 60 * 1000, // 35 min
+    });
+
+    return result;
   }
 
   @Post('forgot-password')

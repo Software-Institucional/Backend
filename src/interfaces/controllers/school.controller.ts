@@ -98,4 +98,10 @@ export class SchoolController {
     updateSchoolDto.user = req.user as UpdateSchoolRequestDto['user'];
     return this.updateSchoolUseCase.create(updateSchoolDto, file);
   }
+
+  @Get('test-payload')
+  @UseGuards(JwtAuthGuard)
+  verificarPayload(@Req() req: Request) {
+    return req.user;
+  }
 }
