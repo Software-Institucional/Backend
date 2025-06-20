@@ -48,7 +48,7 @@ export class LoginUseCase {
       );
     }
 
-    if (request.schoolId !== user.schoolId) {
+    if (user.role !== 'SUPER' && request.schoolId !== user.schoolId) {
       throw new BadRequestException('No tienes acceso a esta Escuela');
     }
 
