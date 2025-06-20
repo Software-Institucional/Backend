@@ -12,7 +12,7 @@ async function bootstrap() {
 
   // Configuración de CORS
   app.enableCors({
-    origin: process.env.FRONTEND_URL?.split(',') || ['http://localhost:5173'],
+    origin: process.env.FRONTEND_URL?.split(',') || ['http://localhost:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -31,6 +31,6 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   app.useGlobalFilters(new HttpExceptionFilter());
-  await app.listen(process.env.PORT ?? 8000);
+  await app.listen(process.env.PORT ?? 3000);
 }
 void bootstrap();
