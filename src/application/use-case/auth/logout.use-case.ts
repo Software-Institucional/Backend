@@ -1,0 +1,29 @@
+import { Inject, Injectable } from '@nestjs/common';
+import {
+  LogoutRequestDto,
+  LogoutResponseDto,
+} from 'src/application/dtos/user.dtos';
+import { RefreshTokenRepository } from 'src/domain/repositories/auth/refresh-token.repository';
+
+@Injectable()
+export class LogoutUseCase {
+  constructor(
+    @Inject('RefreshTokenRepository')
+    private readonly refreshTokenRepository: RefreshTokenRepository,
+  ) {}
+
+  async execute(request: LogoutRequestDto): Promise<LogoutResponseDto> {
+    // Find and revoke refresh token
+    const refreshToken = await this.refreshTokenRepository.findByToken(
+      request.refreshToken,
+    );
+    if (refreshToken && refreshToken.isValid()) {
+      const revokedToken = refreshToken.revoke();
+      await this.refreshTokenRepository.update(revokedToken);
+    }
+
+    return {
+      message: 'Logged out successfully',
+    };
+  }
+}

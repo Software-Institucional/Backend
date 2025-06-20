@@ -1,0 +1,9 @@
+import { PasswordReset } from '../../entities/auth/password-reset.entity';
+
+export interface PasswordResetRepository {
+  findByToken(token: string): Promise<PasswordReset | null>;
+  findByEmail(email: string): Promise<PasswordReset[]>;
+  save(passwordReset: PasswordReset): Promise<PasswordReset>;
+  update(passwordReset: PasswordReset): Promise<PasswordReset>;
+  delete(id: string): Promise<void>;
+}
