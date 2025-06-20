@@ -49,7 +49,9 @@ export class LoginUseCase {
     }
 
     if (user.role !== 'SUPER' && request.schoolId !== user.schoolId) {
-      throw new BadRequestException('No tienes acceso a esta Escuela');
+      throw new BadRequestException(
+        'No tienes acceso a esta Escuela Verifica la Institucion',
+      );
     }
 
     // Generate tokens
