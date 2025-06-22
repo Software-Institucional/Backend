@@ -78,7 +78,7 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-
+      domain: 'eduadminsoft.shop',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
     });
 
@@ -123,7 +123,7 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-
+      domain: 'eduadminsoft.shop',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
     });
 
@@ -132,7 +132,7 @@ export class AuthController {
       httpOnly: false,
       secure: true,
       sameSite: 'none',
-
+      domain: 'eduadminsoft.shop',
       maxAge: 35 * 60 * 1000, // 35 minutos
     });
 
@@ -190,11 +190,13 @@ export class AuthController {
       httpOnly: false,
       secure: true,
       sameSite: 'none',
+      domain: 'eduadminsoft.shop',
     });
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
+      domain: 'eduadminsoft.shop',
     });
 
     return { message: 'Logged out successfully' };
