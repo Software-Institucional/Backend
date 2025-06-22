@@ -45,12 +45,16 @@ export class AuthController {
 
   private getCookieConfig(req: Request) {
     const origin = req.headers.origin || '';
-
-    console.log('Origin recibido:', origin);
+    const allowedOrigins = [
+      'https://www.eduadminsoft.shop',
+      'https://eduadminsoft.shop',
+    ];
+    const isProduction = allowedOrigins.includes(origin);
 
     return {
       secure: true, // Requerido para SameSite=None
       sameSite: 'none' as const, // Requerido para cross-site
+      domain: isProduction ? '.eduadminsoft.shop' : undefined,
     };
   }
 
@@ -93,6 +97,7 @@ export class AuthController {
       sameSite: cookieConfig.sameSite,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
       path: '/',
+      domain: cookieConfig.domain,
     });
 
     // Configuración de cookies para accessToken
@@ -102,6 +107,7 @@ export class AuthController {
       sameSite: cookieConfig.sameSite,
       maxAge: 35 * 60 * 1000, // 35 minutos
       path: '/',
+      domain: cookieConfig.domain,
     });
 
     return result;
@@ -120,7 +126,6 @@ export class AuthController {
     @Req() req: RequestWithCookies,
     @Res({ passthrough: true }) res: Response,
   ) {
-    console.log('Cookies recibidas:', req.cookies);
     const refreshToken = req.cookies?.refreshToken;
 
     if (!refreshToken) {
@@ -140,6 +145,7 @@ export class AuthController {
       sameSite: cookieConfig.sameSite,
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+      domain: cookieConfig.domain,
     });
 
     // Configuración de cookies para accessToken
@@ -148,7 +154,7 @@ export class AuthController {
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
       path: '/',
-
+      domain: cookieConfig.domain,
       maxAge: 35 * 60 * 1000, // 35 minutos
     });
 
@@ -209,12 +215,14 @@ export class AuthController {
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
       path: '/',
+      domain: cookieConfig.domain,
     });
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
       path: '/',
+      domain: cookieConfig.domain,
     });
 
     return { message: 'Logged out successfully' };
