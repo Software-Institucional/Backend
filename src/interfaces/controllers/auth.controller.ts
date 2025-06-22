@@ -82,7 +82,7 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      maxAge: 35 * 60 * 1000,
+      expires: new Date(Date.now() + 35 * 60 * 1000),
     });
     return result;
   }
@@ -115,14 +115,14 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie('accessToken', result.accessToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      maxAge: 35 * 60 * 1000, // 35 min
+      expires: new Date(Date.now() + 35 * 60 * 1000),
     });
 
     return result;
