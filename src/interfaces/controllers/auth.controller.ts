@@ -45,27 +45,27 @@ export class AuthController {
 
   private getCookieConfig(req: Request) {
     const origin = req.headers.origin || '';
-    const isLocalhost =
+    const host = req.get('host') || '';
+
+    console.log('Cookie Config Debug:', { origin, host });
+
+    // Si la petición viene de localhost, configurar para desarrollo
+    const isFromLocalhost =
       origin.includes('localhost') || origin.includes('127.0.0.1');
 
-    // Si es localhost, configurar para desarrollo local
-    if (isLocalhost) {
+    if (isFromLocalhost) {
       return {
-        isProduction: false,
-        isLocalhost: true,
-        secure: false, // HTTP en desarrollo
-        domain: undefined, // Sin dominio para localhost
-        sameSite: 'lax' as const,
+        secure: false, // HTTP permitido
+        domain: undefined, // Sin dominio específico
+        sameSite: 'none' as const, // Permitir cross-origin desde localhost
       };
     }
 
-    // Configuración para producción
+    // Configuración para producción (cuando viene de www.eduadminsoft.shop)
     return {
-      isProduction: true,
-      isLocalhost: false,
-      secure: true, // HTTPS en producción
-      domain: 'eduadminsoft.shop', // Dominio para producción
-      sameSite: 'none' as const,
+      secure: true, // HTTPS requerido
+      domain: '.eduadminsoft.shop', // Dominio con punto para subdominios
+      sameSite: 'none' as const, // Cross-origin entre subdominios
     };
   }
 
