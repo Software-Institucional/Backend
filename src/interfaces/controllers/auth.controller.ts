@@ -51,19 +51,16 @@ export class AuthController {
       origin.includes('192.168.56.1');
 
     if (isFromLocalhost) {
-      // Configuración para desarrollo local
       return {
-        secure: true, // La API está en HTTPS
-        domain: 'localhost', // Sin dominio específico para localhost
-        sameSite: 'lax' as const,
+        secure: false, // HTTP en local
+        sameSite: 'lax' as const, // Más flexible para local
       };
     }
 
-    // Comportamiento estándar para producción.
     return {
-      secure: true,
-      domain: '.eduadminsoft.shop',
-      sameSite: 'none' as const,
+      secure: true, // HTTPS en producción
+      sameSite: 'none' as const, // Cross-origin en producción
+      domain: '.eduadminsoft.shop', // Compartir entre subdominios
     };
   }
 
@@ -99,22 +96,22 @@ export class AuthController {
     const result = await this.loginUseCase.execute(request);
     const cookieConfig = this.getCookieConfig(req);
 
-    // Configuración de cookies para refreshToken
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
       domain: cookieConfig.domain,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+      path: '/',
     });
 
-    // Configuración de cookies para accessToken
     res.cookie('accessToken', result.accessToken, {
       httpOnly: false,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
       domain: cookieConfig.domain,
       maxAge: 35 * 60 * 1000, // 35 minutos
+      path: '/',
     });
 
     return result;
@@ -134,10 +131,13 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     console.log('Cookies recibidas:', req.cookies);
+    console.log('Header Cookie:', req.headers.cookie);
     const refreshToken = req.cookies?.refreshToken;
 
     if (!refreshToken) {
-      throw new UnauthorizedException('Refresh token not found in cookies');
+      throw new UnauthorizedException(
+        'Refresh token no encontrado en las cookies',
+      );
     }
 
     const result = await this.refreshTokenUseCase.execute({
@@ -146,22 +146,22 @@ export class AuthController {
 
     const cookieConfig = this.getCookieConfig(req);
 
-    // Configuración de cookies para refreshToken
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
       domain: cookieConfig.domain,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+      path: '/',
     });
 
-    // Configuración de cookies para accessToken
     res.cookie('accessToken', result.accessToken, {
       httpOnly: false,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
       domain: cookieConfig.domain,
       maxAge: 35 * 60 * 1000, // 35 minutos
+      path: '/',
     });
 
     return result;
@@ -209,24 +209,24 @@ export class AuthController {
     const { refreshToken } = req.cookies;
 
     if (refreshToken) {
-      // Invalida el token en la base de datos
       await this.logoutUseCase.execute({ refreshToken });
     }
 
     const cookieConfig = this.getCookieConfig(req);
 
-    // Limpia las cookies del navegador
     res.clearCookie('accessToken', {
       httpOnly: false,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
       domain: cookieConfig.domain,
+      path: '/',
     });
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
       domain: cookieConfig.domain,
+      path: '/',
     });
 
     return { message: 'Logged out successfully' };
