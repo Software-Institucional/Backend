@@ -7,6 +7,7 @@ import {
   ParseFilePipe,
   Patch,
   Post,
+  Query,
   Req,
   UploadedFile,
   UseGuards,
@@ -22,7 +23,15 @@ import {
 import { CreateSchoolUseCase } from 'src/application/use-case/school/create-school.use-case';
 import { JwtAuthGuard } from 'src/infrastructure/guards/jwt.auth.guard';
 import { Request } from 'express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { SearchSchoolUseCase } from 'src/application/use-case/school/search-school.use-case';
 import { UpdateSchoolUseCase } from 'src/application/use-case/school/update-school.use-case';
 
@@ -62,12 +71,19 @@ export class SchoolController {
   }
 
   @Get()
-  @ApiBody({
-    description: 'Datos para crear un colegio y su imagen',
-    type: CreateSchoolRequestDto,
+  @ApiOperation({ summary: 'Search schools' })
+  @ApiQuery({
+    name: 'name',
+    required: false,
+    description: 'Filter schools by name',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'A list of schools matching the criteria',
+    type: [CreateSchoolResponseDto],
   })
   async searchSchool(
-    @Body() searchSchoolRequestDto: SearchSchoolRequestDto,
+    @Query() searchSchoolRequestDto: SearchSchoolRequestDto,
   ): Promise<CreateSchoolResponseDto[]> {
     return this.searchSchoolUseCase.Search(searchSchoolRequestDto);
   }
