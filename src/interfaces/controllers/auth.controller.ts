@@ -73,7 +73,9 @@ export class AuthController {
   ) {
     const result = await this.loginUseCase.execute(request);
 
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = origin.includes('eduadminsoft.shop');
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    console.log('isProduction:', isProduction);
 
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
@@ -83,7 +85,7 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     res.cookie('accessToken', result.accessToken, {
-      httpOnly: true,
+      httpOnly: false,
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax',
       domain: isProduction ? 'eduadminsoft.shop' : undefined,
@@ -116,7 +118,9 @@ export class AuthController {
       refreshToken,
     });
 
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = origin.includes('eduadminsoft.shop');
+    console.log('Refresh - NODE_ENV:', process.env.NODE_ENV);
+    console.log('Refresh - isProduction:', isProduction);
 
     // Opcional: puedes volver a refrescar las cookies si quieres
     res.cookie('refreshToken', result.refreshToken, {
@@ -128,7 +132,7 @@ export class AuthController {
     });
 
     res.cookie('accessToken', result.accessToken, {
-      httpOnly: true,
+      httpOnly: false,
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax',
       domain: isProduction ? 'eduadminsoft.shop' : undefined,
@@ -184,17 +188,17 @@ export class AuthController {
       await this.logoutUseCase.execute({ refreshToken });
     }
 
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = origin.includes('eduadminsoft.shop');
 
     // Limpia las cookies del navegador
     res.clearCookie('accessToken', {
-      httpOnly: true,
+      httpOnly: false,
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax',
       domain: isProduction ? 'eduadminsoft.shop' : undefined,
     });
     res.clearCookie('refreshToken', {
-      httpOnly: true,
+      httpOnly: false,
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax',
       domain: isProduction ? 'eduadminsoft.shop' : undefined,
