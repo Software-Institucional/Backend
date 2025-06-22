@@ -75,24 +75,22 @@ export class AuthController {
     const result = await this.loginUseCase.execute(request);
 
     const origin = req.headers.origin || '';
-    // El backend siempre corre en api.eduadminsoft.shop, así que detectamos producción
-    // basándonos en si el frontend viene de eduadminsoft.shop
     const isProduction = origin.includes('eduadminsoft.shop');
 
     // Configuración de cookies para refreshToken
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: true, // Siempre HTTPS ya que el backend corre en HTTPS
-      sameSite: isProduction ? 'none' : 'lax',
+      secure: true,
+      sameSite: 'none',
       domain: isProduction ? 'eduadminsoft.shop' : undefined,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
     });
 
     // Configuración de cookies para accessToken
     res.cookie('accessToken', result.accessToken, {
-      httpOnly: false, // Accesible desde JavaScript
-      secure: true, // Siempre HTTPS ya que el backend corre en HTTPS
-      sameSite: isProduction ? 'none' : 'lax',
+      httpOnly: false,
+      secure: true,
+      sameSite: 'none',
       domain: isProduction ? 'eduadminsoft.shop' : undefined,
       maxAge: 35 * 60 * 1000, // 35 minutos
     });
@@ -125,33 +123,22 @@ export class AuthController {
     });
 
     const origin = req.headers.origin || '';
-    // El backend siempre corre en api.eduadminsoft.shop, así que detectamos producción
-    // basándonos en si el frontend viene de eduadminsoft.shop
     const isProduction = origin.includes('eduadminsoft.shop');
-    const isLocalhost =
-      origin.includes('localhost') ||
-      origin.includes('127.0.0.1') ||
-      origin.includes('192.168.');
-
-    console.log('Refresh - NODE_ENV:', process.env.NODE_ENV);
-    console.log('Refresh - Frontend Origin:', origin);
-    console.log('Refresh - isProduction:', isProduction);
-    console.log('Refresh - isLocalhost:', isLocalhost);
 
     // Configuración de cookies para refreshToken
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: true, // Siempre HTTPS ya que el backend corre en HTTPS
-      sameSite: isProduction ? 'none' : 'lax',
+      secure: true,
+      sameSite: 'none',
       domain: isProduction ? 'eduadminsoft.shop' : undefined,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
     });
 
     // Configuración de cookies para accessToken
     res.cookie('accessToken', result.accessToken, {
-      httpOnly: false, // Accesible desde JavaScript
-      secure: true, // Siempre HTTPS ya que el backend corre en HTTPS
-      sameSite: isProduction ? 'none' : 'lax',
+      httpOnly: false,
+      secure: true,
+      sameSite: 'none',
       domain: isProduction ? 'eduadminsoft.shop' : undefined,
       maxAge: 35 * 60 * 1000, // 35 minutos
     });
@@ -206,30 +193,19 @@ export class AuthController {
     }
 
     const origin = req.headers.origin || '';
-    // El backend siempre corre en api.eduadminsoft.shop, así que detectamos producción
-    // basándonos en si el frontend viene de eduadminsoft.shop
     const isProduction = origin.includes('eduadminsoft.shop');
-    const isLocalhost =
-      origin.includes('localhost') ||
-      origin.includes('127.0.0.1') ||
-      origin.includes('192.168.');
-
-    console.log('Logout - NODE_ENV:', process.env.NODE_ENV);
-    console.log('Logout - Frontend Origin:', origin);
-    console.log('Logout - isProduction:', isProduction);
-    console.log('Logout - isLocalhost:', isLocalhost);
 
     // Limpia las cookies del navegador
     res.clearCookie('accessToken', {
       httpOnly: false,
-      secure: true, // Siempre HTTPS ya que el backend corre en HTTPS
-      sameSite: isProduction ? 'none' : 'lax',
+      secure: true,
+      sameSite: 'none',
       domain: isProduction ? 'eduadminsoft.shop' : undefined,
     });
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: true, // Siempre HTTPS ya que el backend corre en HTTPS
-      sameSite: isProduction ? 'none' : 'lax',
+      secure: true,
+      sameSite: 'none',
       domain: isProduction ? 'eduadminsoft.shop' : undefined,
     });
 
