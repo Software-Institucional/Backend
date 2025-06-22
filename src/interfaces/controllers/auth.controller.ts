@@ -45,9 +45,12 @@ export class AuthController {
 
   private getCookieConfig(req: Request) {
     const origin = req.headers.origin || '';
-    const isProduction = origin.includes('eduadminsoft.shop');
+    const host = req.headers.host || '';
+    const isProduction =
+      origin.includes('eduadminsoft.shop') ||
+      host.includes('eduadminsoft.shop');
 
-    console.log(isProduction);
+    console.log('Origin recibido:', origin);
 
     return {
       secure: true, // Requerido para SameSite=None
