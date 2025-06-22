@@ -43,6 +43,23 @@ export class AuthController {
     private readonly logoutUseCase: LogoutUseCase,
   ) {}
 
+  private getCookieConfig(req: Request) {
+    const origin = req.headers.origin || '';
+    const isProduction = origin.includes('eduadminsoft.shop');
+    const isLocalhost = origin.includes('localhost');
+
+    return {
+      isProduction,
+      isLocalhost,
+      // Solo usar secure en producción (HTTPS)
+      secure: isProduction,
+      // Solo establecer dominio en producción
+      domain: isProduction ? 'eduadminsoft.shop' : undefined,
+      // En localhost usar 'lax', en producción 'none' para cross-origin
+      sameSite: (isProduction ? 'none' : 'lax') as 'none' | 'lax' | 'strict',
+    };
+  }
+
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a new user' })
@@ -73,25 +90,23 @@ export class AuthController {
     @Req() req: Request,
   ) {
     const result = await this.loginUseCase.execute(request);
-
-    const origin = req.headers.origin || '';
-    const isProduction = origin.includes('eduadminsoft.shop');
+    const cookieConfig = this.getCookieConfig(req);
 
     // Configuración de cookies para refreshToken
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      domain: isProduction ? 'eduadminsoft.shop' : undefined,
+      secure: cookieConfig.secure,
+      sameSite: cookieConfig.sameSite,
+      domain: cookieConfig.domain,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
     });
 
     // Configuración de cookies para accessToken
     res.cookie('accessToken', result.accessToken, {
       httpOnly: false,
-      secure: true,
-      sameSite: 'none',
-      domain: isProduction ? 'eduadminsoft.shop' : undefined,
+      secure: cookieConfig.secure,
+      sameSite: cookieConfig.sameSite,
+      domain: cookieConfig.domain,
       maxAge: 35 * 60 * 1000, // 35 minutos
     });
 
@@ -122,24 +137,23 @@ export class AuthController {
       refreshToken,
     });
 
-    const origin = req.headers.origin || '';
-    const isProduction = origin.includes('eduadminsoft.shop');
+    const cookieConfig = this.getCookieConfig(req);
 
     // Configuración de cookies para refreshToken
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      domain: isProduction ? 'eduadminsoft.shop' : undefined,
+      secure: cookieConfig.secure,
+      sameSite: cookieConfig.sameSite,
+      domain: cookieConfig.domain,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
     });
 
     // Configuración de cookies para accessToken
     res.cookie('accessToken', result.accessToken, {
       httpOnly: false,
-      secure: true,
-      sameSite: 'none',
-      domain: isProduction ? 'eduadminsoft.shop' : undefined,
+      secure: cookieConfig.secure,
+      sameSite: cookieConfig.sameSite,
+      domain: cookieConfig.domain,
       maxAge: 35 * 60 * 1000, // 35 minutos
     });
 
@@ -192,21 +206,20 @@ export class AuthController {
       await this.logoutUseCase.execute({ refreshToken });
     }
 
-    const origin = req.headers.origin || '';
-    const isProduction = origin.includes('eduadminsoft.shop');
+    const cookieConfig = this.getCookieConfig(req);
 
     // Limpia las cookies del navegador
     res.clearCookie('accessToken', {
       httpOnly: false,
-      secure: true,
-      sameSite: 'none',
-      domain: isProduction ? 'eduadminsoft.shop' : undefined,
+      secure: cookieConfig.secure,
+      sameSite: cookieConfig.sameSite,
+      domain: cookieConfig.domain,
     });
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      domain: isProduction ? 'eduadminsoft.shop' : undefined,
+      secure: cookieConfig.secure,
+      sameSite: cookieConfig.sameSite,
+      domain: cookieConfig.domain,
     });
 
     return { message: 'Logged out successfully' };
