@@ -16,7 +16,7 @@ import { LogoutUseCase } from 'src/application/use-case/auth/logout.use-case';
 import { RefreshTokenUseCase } from 'src/application/use-case/auth/refresh-token.use-case';
 import { RegisterUseCase } from 'src/application/use-case/auth/register.use-case';
 import { ResetPasswordUseCase } from 'src/application/use-case/auth/reset-password.use-case';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import {
   ForgotPasswordRequestDto,
   ForgotPasswordResponseDto,
@@ -70,9 +70,11 @@ export class AuthController {
   async login(
     @Body() request: LoginRequestDto,
     @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
   ) {
     const result = await this.loginUseCase.execute(request);
 
+    const origin = req.headers.origin || '';
     const isProduction = origin.includes('eduadminsoft.shop');
     console.log('NODE_ENV:', process.env.NODE_ENV);
     console.log('isProduction:', isProduction);
@@ -118,6 +120,7 @@ export class AuthController {
       refreshToken,
     });
 
+    const origin = req.headers.origin || '';
     const isProduction = origin.includes('eduadminsoft.shop');
     console.log('Refresh - NODE_ENV:', process.env.NODE_ENV);
     console.log('Refresh - isProduction:', isProduction);
@@ -188,6 +191,7 @@ export class AuthController {
       await this.logoutUseCase.execute({ refreshToken });
     }
 
+    const origin = req.headers.origin || '';
     const isProduction = origin.includes('eduadminsoft.shop');
 
     // Limpia las cookies del navegador
