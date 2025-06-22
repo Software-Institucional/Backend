@@ -7,6 +7,11 @@ export interface SchoolRepository {
     page?: number,
     limit?: number,
   ): Promise<School[]>;
+  searchSchoolsWithCount(
+    name?: string,
+    page?: number,
+    limit?: number,
+  ): Promise<{ schools: School[]; total: number }>;
   updateSchool(school: School, id: string): Promise<School>;
   findById(id: string): Promise<School | null>;
 }

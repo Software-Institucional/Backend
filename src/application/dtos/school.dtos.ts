@@ -58,6 +58,30 @@ export class SearchSchoolRequestDto {
   limit?: number;
 }
 
+export class SearchSchoolResponseDto {
+  @ApiProperty({
+    description: 'Lista de colegios encontrados',
+    type: [CreateSchoolResponseDto],
+  })
+  schools: CreateSchoolResponseDto[];
+
+  @ApiProperty({
+    description: 'Metadatos de paginación',
+    example: {
+      total: 50,
+      page: 1,
+      limit: 10,
+      totalPages: 5,
+    },
+  })
+  metadata: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
 export class UpdateSchoolRequestDto {
   @ApiProperty({ example: '' })
   id: string;

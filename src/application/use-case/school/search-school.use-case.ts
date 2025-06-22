@@ -1,7 +1,7 @@
 import { Inject } from '@nestjs/common';
 import {
-  CreateSchoolResponseDto,
   SearchSchoolRequestDto,
+  SearchSchoolResponseDto,
 } from 'src/application/dtos/school.dtos';
 import { SchoolRepository } from 'src/domain/repositories/school/scholl.repository';
 
@@ -11,27 +11,38 @@ export class SearchSchoolUseCase {
     private readonly schoolRepository: SchoolRepository,
   ) {}
 
-  async Search(
-    req: SearchSchoolRequestDto,
-  ): Promise<CreateSchoolResponseDto[]> {
-    const schools = await this.schoolRepository.searchSchools(
-      req.name,
-      req.page,
-      req.limit,
-    );
+  async Search(req: SearchSchoolRequestDto): Promise<SearchSchoolResponseDto> {
+    const { schools, total } =
+      await this.schoolRepository.searchSchoolsWithCount(
+        req.name,
+        req.page,
+        req.limit,
+      );
 
-    return schools.map((s) => ({
-      school: {
-        id: s.id,
-        name: s.name,
-        address: s.address ?? '',
-        phone: s.phone ?? '',
-        imgUrl: s.imgUrl ?? '',
-        department: s.department ?? '',
-        municipality: s.municipality ?? '',
-        mail: s.mail ?? '',
-        website: s.website ?? '',
+    const page = req.page || 1;
+    const limit = req.limit || 10;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      schools: schools.map((s) => ({
+        school: {
+          id: s.id,
+          name: s.name,
+          address: s.address ?? '',
+          phone: s.phone ?? '',
+          imgUrl: s.imgUrl ?? '',
+          department: s.department ?? '',
+          municipality: s.municipality ?? '',
+          mail: s.mail ?? '',
+          website: s.website ?? '',
+        },
+      })),
+      metadata: {
+        total,
+        page,
+        limit,
+        totalPages,
       },
-    }));
+    };
   }
 }

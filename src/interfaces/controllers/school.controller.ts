@@ -18,6 +18,7 @@ import {
   CreateSchoolRequestDto,
   CreateSchoolResponseDto,
   SearchSchoolRequestDto,
+  SearchSchoolResponseDto,
   UpdateSchoolRequestDto,
 } from 'src/application/dtos/school.dtos';
 import { CreateSchoolUseCase } from 'src/application/use-case/school/create-school.use-case';
@@ -92,11 +93,11 @@ export class SchoolController {
   @ApiResponse({
     status: 200,
     description: 'A list of schools matching the criteria',
-    type: [CreateSchoolResponseDto],
+    type: SearchSchoolResponseDto,
   })
   async searchSchool(
     @Query() searchSchoolDto: SearchSchoolRequestDto,
-  ): Promise<CreateSchoolResponseDto[]> {
+  ): Promise<SearchSchoolResponseDto> {
     const { name, page = 1, limit = 10 } = searchSchoolDto;
     return this.searchSchoolUseCase.Search({
       name,
