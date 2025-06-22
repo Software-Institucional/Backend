@@ -30,6 +30,7 @@ import {
   ResetPasswordResponseDto,
 } from 'src/application/dtos/user.dtos';
 import { RequestWithCookies } from 'src/types/express';
+import { allowedOrigins } from 'src/main';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -69,19 +70,24 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(
     @Body() request: LoginRequestDto,
+    @Req() req: RequestWithCookies,
     @Res({ passthrough: true }) res: Response,
   ) {
     const result = await this.loginUseCase.execute(request);
+
+    const origin = req.headers.origin;
+    const isLocalFrontend = origin ? allowedOrigins.includes(origin) : false;
+
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // true en prod, false en dev
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // none en prod, lax en dev
+      secure: !isLocalFrontend,
+      sameSite: !isLocalFrontend ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     res.cookie('accessToken', result.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // true en prod, false en dev
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: !isLocalFrontend,
+      sameSite: !isLocalFrontend ? 'none' : 'lax',
       maxAge: 35 * 60 * 1000,
     });
     return result;
@@ -111,18 +117,21 @@ export class AuthController {
       refreshToken,
     });
 
+    const origin = req.headers.origin;
+    const isLocalFrontend = origin ? allowedOrigins.includes(origin) : false;
+
     // Opcional: puedes volver a refrescar las cookies si quieres
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // true en prod, false en dev
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: !isLocalFrontend,
+      sameSite: !isLocalFrontend ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie('accessToken', result.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // true en prod, false en dev
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: !isLocalFrontend,
+      sameSite: !isLocalFrontend ? 'none' : 'lax',
       maxAge: 35 * 60 * 1000,
     });
 
@@ -178,16 +187,19 @@ export class AuthController {
     // Invalida el token en la base de datos
     await this.logoutUseCase.execute({ refreshToken });
 
+    const origin = req.headers.origin;
+    const isLocalFrontend = origin ? allowedOrigins.includes(origin) : false;
+
     // Limpia las cookies del navegador
     res.clearCookie('accessToken', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // true en prod, false en dev
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: !isLocalFrontend,
+      sameSite: !isLocalFrontend ? 'none' : 'lax',
     });
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // true en prod, false en dev
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: !isLocalFrontend,
+      sameSite: !isLocalFrontend ? 'none' : 'lax',
     });
 
     return { message: 'Logged out successfully' };

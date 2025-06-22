@@ -4,6 +4,12 @@ import { HttpExceptionFilter } from './domain/exceptions/http-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 
+export const allowedOrigins = [
+  'http://localhost:3000',
+  'http://192.168.56.1:3000',
+  'https://www.eduadminsoft.shop',
+];
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -12,10 +18,16 @@ async function bootstrap() {
 
   // Configuración de CORS
   app.enableCors({
-    // origin: process.env.FRONTEND_URL?.split(',') || ['http://localhost:3000'],
-    // credentials: true,
-    // methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    origin: true,
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
+    },
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Accept, Authorization',
