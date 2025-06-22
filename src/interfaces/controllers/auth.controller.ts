@@ -45,13 +45,11 @@ export class AuthController {
 
   private getCookieConfig(req: Request) {
     const origin = req.headers.origin || '';
-    const isProduction = origin.includes('eduadminsoft.shop');
 
     console.log('Origin recibido:', origin);
 
     return {
       secure: true, // Requerido para SameSite=None
-      domain: isProduction ? '.eduadminsoft.shop' : undefined,
       sameSite: 'none' as const, // Requerido para cross-site
     };
   }
@@ -93,7 +91,6 @@ export class AuthController {
       httpOnly: true,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
-      domain: cookieConfig.domain,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
       path: '/',
     });
@@ -103,7 +100,6 @@ export class AuthController {
       httpOnly: false,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
-      domain: cookieConfig.domain,
       maxAge: 35 * 60 * 1000, // 35 minutos
       path: '/',
     });
@@ -142,7 +138,6 @@ export class AuthController {
       httpOnly: true,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
-      domain: cookieConfig.domain,
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
     });
@@ -152,7 +147,6 @@ export class AuthController {
       httpOnly: false,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
-      domain: cookieConfig.domain,
       path: '/',
 
       maxAge: 35 * 60 * 1000, // 35 minutos
@@ -214,14 +208,12 @@ export class AuthController {
       httpOnly: false,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
-      domain: cookieConfig.domain,
       path: '/',
     });
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
-      domain: cookieConfig.domain,
       path: '/',
     });
 
