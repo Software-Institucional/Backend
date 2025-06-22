@@ -45,11 +45,11 @@ export class AuthController {
 
   private getCookieConfig(req: Request) {
     const origin = req.headers.origin || '';
-    const isProduction = origin.includes('eduadminsoft.shop');
+    const isProduction = origin.includes('www.eduadminsoft.shop');
 
     return {
       secure: true, // Requerido para SameSite=None
-      domain: isProduction ? 'eduadminsoft.shop' : undefined,
+      domain: isProduction ? '.eduadminsoft.shop' : undefined,
       sameSite: 'none' as const, // Requerido para cross-site
     };
   }
