@@ -8,6 +8,7 @@ export const allowedOrigins = [
   'http://localhost:3000',
   'http://192.168.56.1:3000',
   'https://www.eduadminsoft.shop',
+  'https://0870-177-8-78-179.ngrok-free.app',
 ];
 
 async function bootstrap() {
@@ -46,6 +47,6 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   app.useGlobalFilters(new HttpExceptionFilter());
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3001);
 }
 void bootstrap();

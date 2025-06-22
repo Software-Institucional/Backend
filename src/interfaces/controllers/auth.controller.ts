@@ -30,7 +30,6 @@ import {
   ResetPasswordResponseDto,
 } from 'src/application/dtos/user.dtos';
 import { RequestWithCookies } from 'src/types/express';
-import { allowedOrigins } from 'src/main';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -75,19 +74,22 @@ export class AuthController {
   ) {
     const result = await this.loginUseCase.execute(request);
 
+    // Detectar si el frontend es local o remoto
     const origin = req.headers.origin;
-    const isLocalFrontend = origin ? allowedOrigins.includes(origin) : false;
+    const isLocalFrontend =
+      origin && (origin.includes('localhost') || origin.includes('127.0.0.1'));
+    const isProduction = process.env.NODE_ENV === 'production';
 
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: !isLocalFrontend,
-      sameSite: !isLocalFrontend ? 'none' : 'lax',
+      secure: !isLocalFrontend || isProduction, // true si frontend remoto o producción
+      sameSite: isLocalFrontend ? 'lax' : 'none', // lax para local, none para remoto
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     res.cookie('accessToken', result.accessToken, {
       httpOnly: true,
-      secure: !isLocalFrontend,
-      sameSite: !isLocalFrontend ? 'none' : 'lax',
+      secure: !isLocalFrontend || isProduction, // true si frontend remoto o producción
+      sameSite: isLocalFrontend ? 'lax' : 'none', // lax para local, none para remoto
       maxAge: 35 * 60 * 1000,
     });
     return result;
@@ -117,21 +119,24 @@ export class AuthController {
       refreshToken,
     });
 
+    // Detectar si el frontend es local o remoto
     const origin = req.headers.origin;
-    const isLocalFrontend = origin ? allowedOrigins.includes(origin) : false;
+    const isLocalFrontend =
+      origin && (origin.includes('localhost') || origin.includes('127.0.0.1'));
+    const isProduction = process.env.NODE_ENV === 'production';
 
     // Opcional: puedes volver a refrescar las cookies si quieres
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: !isLocalFrontend,
-      sameSite: !isLocalFrontend ? 'none' : 'lax',
+      secure: !isLocalFrontend || isProduction, // true si frontend remoto o producción
+      sameSite: isLocalFrontend ? 'lax' : 'none', // lax para local, none para remoto
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie('accessToken', result.accessToken, {
       httpOnly: true,
-      secure: !isLocalFrontend,
-      sameSite: !isLocalFrontend ? 'none' : 'lax',
+      secure: !isLocalFrontend || isProduction, // true si frontend remoto o producción
+      sameSite: isLocalFrontend ? 'lax' : 'none', // lax para local, none para remoto
       maxAge: 35 * 60 * 1000,
     });
 
@@ -187,19 +192,22 @@ export class AuthController {
     // Invalida el token en la base de datos
     await this.logoutUseCase.execute({ refreshToken });
 
+    // Detectar si el frontend es local o remoto
     const origin = req.headers.origin;
-    const isLocalFrontend = origin ? allowedOrigins.includes(origin) : false;
+    const isLocalFrontend =
+      origin && (origin.includes('localhost') || origin.includes('127.0.0.1'));
+    const isProduction = process.env.NODE_ENV === 'production';
 
     // Limpia las cookies del navegador
     res.clearCookie('accessToken', {
       httpOnly: true,
-      secure: !isLocalFrontend,
-      sameSite: !isLocalFrontend ? 'none' : 'lax',
+      secure: !isLocalFrontend || isProduction, // true si frontend remoto o producción
+      sameSite: isLocalFrontend ? 'lax' : 'none', // lax para local, none para remoto
     });
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: !isLocalFrontend,
-      sameSite: !isLocalFrontend ? 'none' : 'lax',
+      secure: !isLocalFrontend || isProduction, // true si frontend remoto o producción
+      sameSite: isLocalFrontend ? 'lax' : 'none', // lax para local, none para remoto
     });
 
     return { message: 'Logged out successfully' };
