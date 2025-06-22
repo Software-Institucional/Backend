@@ -10,30 +10,14 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.enableCors({
-    origin: (
-      origin: string | undefined,
-      callback: (err: Error | null, allow?: boolean) => void,
-    ) => {
-      const allowedOrigins = [
-        'http://localhost:3000',
-        'http://127.0.0.1:3000',
-        'http://192.168.56.1:3000',
-        'https://www.eduadminsoft.shop',
-        'https://eduadminsoft.shop',
-      ];
-
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'), false);
-      }
-    },
+    origin: [
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      'http://192.168.56.1:3000',
+      'https://www.eduadminsoft.shop',
+      'https://eduadminsoft.shop',
+    ],
     credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Accept, Authorization, Cookie',
-    exposedHeaders: ['Set-Cookie'], // Permite que el frontend vea las cookies
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
   });
 
   const config = new DocumentBuilder()
