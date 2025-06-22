@@ -49,7 +49,7 @@ export class AuthController {
 
     return {
       secure: true, // Requerido para SameSite=None
-      domain: isProduction ? '.eduadminsoft.shop' : undefined,
+      domain: isProduction ? 'eduadminsoft.shop' : undefined,
       sameSite: 'none' as const, // Requerido para cross-site
     };
   }

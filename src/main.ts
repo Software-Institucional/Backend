@@ -31,6 +31,9 @@ async function bootstrap() {
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Accept, Authorization, Cookie',
+    exposedHeaders: ['Set-Cookie'], // Permite que el frontend vea las cookies
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
 
   const config = new DocumentBuilder()
