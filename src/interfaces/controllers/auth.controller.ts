@@ -74,14 +74,14 @@ export class AuthController {
     const result = await this.loginUseCase.execute(request);
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production', // true en prod, false en dev
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // none en prod, lax en dev
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     res.cookie('accessToken', result.accessToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production', // true en prod, false en dev
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 35 * 60 * 1000,
     });
     return result;
@@ -100,6 +100,7 @@ export class AuthController {
     @Req() req: RequestWithCookies,
     @Res({ passthrough: true }) res: Response,
   ) {
+    console.log('Cookies recibidas:', req.cookies);
     const refreshToken = req.cookies?.refreshToken;
 
     if (!refreshToken) {
@@ -113,15 +114,15 @@ export class AuthController {
     // Opcional: puedes volver a refrescar las cookies si quieres
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production', // true en prod, false en dev
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie('accessToken', result.accessToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production', // true en prod, false en dev
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 35 * 60 * 1000,
     });
 
@@ -180,13 +181,13 @@ export class AuthController {
     // Limpia las cookies del navegador
     res.clearCookie('accessToken', {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production', // true en prod, false en dev
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production', // true en prod, false en dev
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
 
     return { message: 'Logged out successfully' };
