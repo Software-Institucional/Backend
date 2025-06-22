@@ -9,7 +9,7 @@ export class PrismaSchoolRepository implements SchoolRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async createSchool(school: School): Promise<School> {
-    const savedSchool = await this.prisma.school.create({
+    const createdSchool = await this.prisma.school.create({
       data: {
         id: school.id,
         name: school.name,
@@ -20,32 +20,57 @@ export class PrismaSchoolRepository implements SchoolRepository {
         municipality: school.municipality,
         mail: school.mail,
         website: school.website,
+        createdAt: school.createdAt,
+        updatedAt: school.updatedAt,
       },
     });
-
     return new School(
-      savedSchool.id,
-      savedSchool.name,
-      savedSchool.address ?? undefined,
-      savedSchool.phone ?? undefined,
-      savedSchool.imgUrl ?? undefined,
-      savedSchool.department ?? undefined,
-      savedSchool.municipality ?? undefined,
-      savedSchool.mail ?? undefined,
-      savedSchool.website ?? undefined,
-      savedSchool.createdAt,
-      savedSchool.updatedAt,
+      createdSchool.id,
+      createdSchool.name,
+      createdSchool.address ?? undefined,
+      createdSchool.phone ?? undefined,
+      createdSchool.imgUrl ?? undefined,
+      createdSchool.department ?? undefined,
+      createdSchool.municipality ?? undefined,
+      createdSchool.mail ?? undefined,
+      createdSchool.website ?? undefined,
+      createdSchool.createdAt,
+      createdSchool.updatedAt,
     );
   }
 
-  async searchSchools(name: string, page = 1, limit = 10): Promise<School[]> {
+  async findById(id: string): Promise<School | null> {
+    const school = await this.prisma.school.findUnique({ where: { id } });
+    if (!school) {
+      return null;
+    }
+    return new School(
+      school.id,
+      school.name,
+      school.address ?? undefined,
+      school.phone ?? undefined,
+      school.imgUrl ?? undefined,
+      school.department ?? undefined,
+      school.municipality ?? undefined,
+      school.mail ?? undefined,
+      school.website ?? undefined,
+      school.createdAt,
+      school.updatedAt,
+    );
+  }
+
+  async searchSchools(name?: string, page = 1, limit = 10): Promise<School[]> {
+    const whereCondition = name
+      ? {
+          name: {
+            contains: name,
+            mode: 'insensitive' as const,
+          },
+        }
+      : {};
+
     const schools = await this.prisma.school.findMany({
-      where: {
-        name: {
-          contains: name,
-          mode: 'insensitive',
-        },
-      },
+      where: whereCondition,
       skip: (page - 1) * limit,
       take: limit,
     });
@@ -67,11 +92,10 @@ export class PrismaSchoolRepository implements SchoolRepository {
         ),
     );
   }
-  async updateSchool(school: School, id: string): Promise<School> {
+
+  async updateSchool(school: School): Promise<School> {
     const updatedSchool = await this.prisma.school.update({
-      where: {
-        id: id,
-      },
+      where: { id: school.id },
       data: {
         name: school.name,
         address: school.address,
@@ -81,9 +105,9 @@ export class PrismaSchoolRepository implements SchoolRepository {
         municipality: school.municipality,
         mail: school.mail,
         website: school.website,
+        updatedAt: new Date(),
       },
     });
-
     return new School(
       updatedSchool.id,
       updatedSchool.name,
@@ -96,24 +120,6 @@ export class PrismaSchoolRepository implements SchoolRepository {
       updatedSchool.website ?? undefined,
       updatedSchool.createdAt,
       updatedSchool.updatedAt,
-    );
-  }
-
-  async findById(id: string): Promise<School | null> {
-    const school = await this.prisma.school.findUnique({ where: { id } });
-    if (!school) return null;
-    return new School(
-      school.id,
-      school.name,
-      school.address ?? undefined,
-      school.phone ?? undefined,
-      school.imgUrl ?? undefined,
-      school.department ?? undefined,
-      school.municipality ?? undefined,
-      school.mail ?? undefined,
-      school.website ?? undefined,
-      school.createdAt,
-      school.updatedAt,
     );
   }
 }

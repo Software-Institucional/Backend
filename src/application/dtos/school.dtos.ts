@@ -47,12 +47,15 @@ export class CreateSchoolResponseDto {
 }
 
 export class SearchSchoolRequestDto {
-  @ApiProperty({ example: 'Escuela Nacional de Ciencias' })
-  name: string;
-  @ApiProperty({ example: '1' })
-  page: number;
-  @ApiProperty({ example: '10' })
-  limit: number;
+  @ApiProperty({
+    example: 'Escuela Nacional de Ciencias',
+    required: false,
+  })
+  name?: string;
+  @ApiProperty({ example: 1, default: 1, required: false })
+  page?: number;
+  @ApiProperty({ example: 10, default: 10, required: false })
+  limit?: number;
 }
 
 export class UpdateSchoolRequestDto {

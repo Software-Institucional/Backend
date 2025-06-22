@@ -77,15 +77,32 @@ export class SchoolController {
     required: false,
     description: 'Filter schools by name',
   })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Page number for pagination',
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Number of results per page',
+    type: Number,
+  })
   @ApiResponse({
     status: 200,
     description: 'A list of schools matching the criteria',
     type: [CreateSchoolResponseDto],
   })
   async searchSchool(
-    @Query() searchSchoolRequestDto: SearchSchoolRequestDto,
+    @Query() searchSchoolDto: SearchSchoolRequestDto,
   ): Promise<CreateSchoolResponseDto[]> {
-    return this.searchSchoolUseCase.Search(searchSchoolRequestDto);
+    const { name, page = 1, limit = 10 } = searchSchoolDto;
+    return this.searchSchoolUseCase.Search({
+      name,
+      page: +page,
+      limit: +limit,
+    });
   }
 
   @Patch('update')
