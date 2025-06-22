@@ -53,14 +53,14 @@ export class AuthController {
     if (isFromLocalhost) {
       return {
         secure: false, // HTTP en local
-        sameSite: 'lax' as const, // Más flexible para local
+        sameSite: 'lax' as const, // Flexible para local
       };
     }
 
     return {
       secure: true, // HTTPS en producción
       sameSite: 'none' as const, // Cross-origin en producción
-      domain: '.eduadminsoft.shop', // Compartir entre subdominios
+      domain: 'www.eduadminsoft.shop', // Alineado con el frontend en producción
     };
   }
 
@@ -93,6 +93,8 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
     @Req() req: Request,
   ) {
+    console.log('Login - Origin:', req.headers.origin);
+    console.log('Login - Headers:', req.headers);
     const result = await this.loginUseCase.execute(request);
     const cookieConfig = this.getCookieConfig(req);
 
@@ -114,6 +116,10 @@ export class AuthController {
       path: '/',
     });
 
+    console.log('Login - Cookies set:', {
+      accessToken: !!result.accessToken,
+      refreshToken: !!result.refreshToken,
+    });
     return result;
   }
 
@@ -130,8 +136,9 @@ export class AuthController {
     @Req() req: RequestWithCookies,
     @Res({ passthrough: true }) res: Response,
   ) {
-    console.log('Cookies recibidas:', req.cookies);
-    console.log('Header Cookie:', req.headers.cookie);
+    console.log('Refresh - Origin:', req.headers.origin);
+    console.log('Refresh - Cookies received:', req.cookies);
+    console.log('Refresh - Cookie header:', req.headers.cookie);
     const refreshToken = req.cookies?.refreshToken;
 
     if (!refreshToken) {
@@ -206,6 +213,7 @@ export class AuthController {
     @Req() req: RequestWithCookies,
     @Res({ passthrough: true }) res: Response,
   ): Promise<LogoutResponseDto> {
+    console.log('Logout - Cookies received:', req.cookies);
     const { refreshToken } = req.cookies;
 
     if (refreshToken) {
