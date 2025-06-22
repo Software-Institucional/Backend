@@ -69,27 +69,24 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(
     @Body() request: LoginRequestDto,
-    @Req() req: RequestWithCookies,
     @Res({ passthrough: true }) res: Response,
   ) {
     const result = await this.loginUseCase.execute(request);
 
-    // Detectar si el frontend es local o remoto
-    const origin = req.headers.origin;
-    const isLocalFrontend =
-      origin && (origin.includes('localhost') || origin.includes('127.0.0.1'));
     const isProduction = process.env.NODE_ENV === 'production';
 
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: !isLocalFrontend || isProduction, // true si frontend remoto o producción
-      sameSite: isLocalFrontend ? 'lax' : 'none', // lax para local, none para remoto
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      domain: isProduction ? 'eduadminsoft.shop' : undefined,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     res.cookie('accessToken', result.accessToken, {
       httpOnly: true,
-      secure: !isLocalFrontend || isProduction, // true si frontend remoto o producción
-      sameSite: isLocalFrontend ? 'lax' : 'none', // lax para local, none para remoto
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      domain: isProduction ? 'eduadminsoft.shop' : undefined,
       maxAge: 35 * 60 * 1000,
     });
     return result;
@@ -119,24 +116,22 @@ export class AuthController {
       refreshToken,
     });
 
-    // Detectar si el frontend es local o remoto
-    const origin = req.headers.origin;
-    const isLocalFrontend =
-      origin && (origin.includes('localhost') || origin.includes('127.0.0.1'));
     const isProduction = process.env.NODE_ENV === 'production';
 
     // Opcional: puedes volver a refrescar las cookies si quieres
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      secure: !isLocalFrontend || isProduction, // true si frontend remoto o producción
-      sameSite: isLocalFrontend ? 'lax' : 'none', // lax para local, none para remoto
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      domain: isProduction ? 'eduadminsoft.shop' : undefined,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie('accessToken', result.accessToken, {
       httpOnly: true,
-      secure: !isLocalFrontend || isProduction, // true si frontend remoto o producción
-      sameSite: isLocalFrontend ? 'lax' : 'none', // lax para local, none para remoto
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      domain: isProduction ? 'eduadminsoft.shop' : undefined,
       maxAge: 35 * 60 * 1000,
     });
 
@@ -184,30 +179,25 @@ export class AuthController {
   ): Promise<LogoutResponseDto> {
     const { refreshToken } = req.cookies;
 
-    if (!refreshToken) {
-      // Si no hay token, no hay nada que hacer.
-      return { message: 'No active session to log out from.' };
+    if (refreshToken) {
+      // Invalida el token en la base de datos
+      await this.logoutUseCase.execute({ refreshToken });
     }
 
-    // Invalida el token en la base de datos
-    await this.logoutUseCase.execute({ refreshToken });
-
-    // Detectar si el frontend es local o remoto
-    const origin = req.headers.origin;
-    const isLocalFrontend =
-      origin && (origin.includes('localhost') || origin.includes('127.0.0.1'));
     const isProduction = process.env.NODE_ENV === 'production';
 
     // Limpia las cookies del navegador
     res.clearCookie('accessToken', {
       httpOnly: true,
-      secure: !isLocalFrontend || isProduction, // true si frontend remoto o producción
-      sameSite: isLocalFrontend ? 'lax' : 'none', // lax para local, none para remoto
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      domain: isProduction ? 'eduadminsoft.shop' : undefined,
     });
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: !isLocalFrontend || isProduction, // true si frontend remoto o producción
-      sameSite: isLocalFrontend ? 'lax' : 'none', // lax para local, none para remoto
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      domain: isProduction ? 'eduadminsoft.shop' : undefined,
     });
 
     return { message: 'Logged out successfully' };
