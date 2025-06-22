@@ -95,6 +95,7 @@ export class AuthController {
       sameSite: cookieConfig.sameSite,
       domain: cookieConfig.domain,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+      path: '/',
     });
 
     // Configuración de cookies para accessToken
@@ -104,6 +105,7 @@ export class AuthController {
       sameSite: cookieConfig.sameSite,
       domain: cookieConfig.domain,
       maxAge: 35 * 60 * 1000, // 35 minutos
+      path: '/',
     });
 
     return result;
@@ -141,6 +143,7 @@ export class AuthController {
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
       domain: cookieConfig.domain,
+      path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
     });
 
@@ -150,6 +153,8 @@ export class AuthController {
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
       domain: cookieConfig.domain,
+      path: '/',
+
       maxAge: 35 * 60 * 1000, // 35 minutos
     });
 
@@ -210,12 +215,14 @@ export class AuthController {
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
       domain: cookieConfig.domain,
+      path: '/',
     });
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
       domain: cookieConfig.domain,
+      path: '/',
     });
 
     return { message: 'Logged out successfully' };
