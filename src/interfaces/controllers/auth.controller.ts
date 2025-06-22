@@ -60,7 +60,7 @@ export class AuthController {
     return {
       secure: true, // HTTPS en producción
       sameSite: 'none' as const, // Cross-origin en producción
-      domain: 'www.eduadminsoft.shop', // Alineado con el frontend en producción
+      domain: '.eduadminsoft.shop', // Correcto: dominio base para subdominios
     };
   }
 
