@@ -54,7 +54,7 @@ export class AuthController {
       // Configuración para desarrollo local
       return {
         secure: true, // La API está en HTTPS
-        domain: undefined, // Sin dominio específico para localhost
+        domain: 'localhost', // Sin dominio específico para localhost
         sameSite: 'lax' as const,
       };
     }
