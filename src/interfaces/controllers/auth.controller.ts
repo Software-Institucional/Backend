@@ -178,8 +178,16 @@ export class AuthController {
     await this.logoutUseCase.execute({ refreshToken });
 
     // Limpia las cookies del navegador
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken');
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
 
     return { message: 'Logged out successfully' };
   }
