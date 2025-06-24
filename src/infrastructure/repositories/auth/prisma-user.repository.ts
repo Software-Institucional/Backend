@@ -10,62 +10,100 @@ export class PrismaUserRepository implements UserRepository {
   async findById(id: string): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
       where: { id },
+      include: {
+        schools: { include: { school: true } },
+      },
     });
 
     if (!user) return null;
 
-    return new User(
+    const userEntity = new User(
       user.id,
       user.email,
       user.password,
       user.firstName,
       user.lastName,
       user.role,
-      user.schoolId ?? undefined,
       user.isEmailVerified,
+      user.createdById!,
       user.createdAt,
       user.updatedAt,
     );
+    userEntity.schools = user.schools.map((s) => ({
+      id: s.school.id,
+      name: s.school.name,
+    }));
+    return userEntity;
   }
 
   async findByEmail(email: string): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
       where: { email },
+      include: { schools: { include: { school: true } } },
     });
 
     if (!user) return null;
 
-    return new User(
+    const userEntity = new User(
       user.id,
       user.email,
       user.password,
       user.firstName,
       user.lastName,
       user.role,
-      user.schoolId!,
       user.isEmailVerified,
+      user.createdById!,
       user.createdAt,
       user.updatedAt,
     );
+    userEntity.schools = user.schools.map((s) => ({
+      id: s.school.id,
+      name: s.school.name,
+    }));
+    return userEntity;
   }
 
-  async save(user: User): Promise<User> {
-    // Si el usuario es SUPER, no debe tener schoolId
-    const data = {
-      id: user.id,
-      email: user.email,
-      password: user.password,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      role: user.role,
-      isEmailVerified: user.isEmailVerified,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      ...(user.role !== 'SUPER' && { schoolId: user.schoolId }),
-    };
+  async save(
+    user: User,
+    schools?: { schoolId: string; sedeIds?: string[] }[],
+  ): Promise<User> {
+    const savedUser = await this.prisma.$transaction(async (prisma) => {
+      const createdUser = await prisma.user.create({
+        data: {
+          id: user.id,
+          email: user.email,
+          password: user.password,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          isEmailVerified: user.isEmailVerified,
+          createdById: user.createdById,
+        },
+      });
 
-    const savedUser = await this.prisma.user.create({
-      data,
+      if (schools && schools.length > 0) {
+        for (const school of schools) {
+          if (school.sedeIds && school.sedeIds.length > 0) {
+            for (const sedeId of school.sedeIds) {
+              await prisma.schoolsOnUsers.create({
+                data: {
+                  userId: createdUser.id,
+                  schoolId: school.schoolId,
+                  sedeId: sedeId,
+                },
+              });
+            }
+          } else {
+            await prisma.schoolsOnUsers.create({
+              data: {
+                userId: createdUser.id,
+                schoolId: school.schoolId,
+              },
+            });
+          }
+        }
+      }
+      return createdUser;
     });
 
     return new User(
@@ -75,8 +113,8 @@ export class PrismaUserRepository implements UserRepository {
       savedUser.firstName,
       savedUser.lastName,
       savedUser.role,
-      savedUser.schoolId ?? undefined,
       savedUser.isEmailVerified,
+      savedUser.createdById!,
       savedUser.createdAt,
       savedUser.updatedAt,
     );
@@ -91,9 +129,8 @@ export class PrismaUserRepository implements UserRepository {
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
-        schoolId: user.schoolId,
         isEmailVerified: user.isEmailVerified,
-        updatedAt: user.updatedAt,
+        updatedAt: new Date(),
       },
     });
 
@@ -104,8 +141,8 @@ export class PrismaUserRepository implements UserRepository {
       updatedUser.firstName,
       updatedUser.lastName,
       updatedUser.role,
-      updatedUser.schoolId!,
       updatedUser.isEmailVerified,
+      updatedUser.createdById!,
       updatedUser.createdAt,
       updatedUser.updatedAt,
     );
@@ -114,6 +151,35 @@ export class PrismaUserRepository implements UserRepository {
   async delete(id: string): Promise<void> {
     await this.prisma.user.delete({
       where: { id },
+    });
+  }
+
+  async allUser(id: string): Promise<User[]> {
+    const users = await this.prisma.user.findMany({
+      where: { createdById: id },
+      include: {
+        schools: { include: { school: true } },
+      },
+    });
+
+    return users.map((user) => {
+      const userEntity = new User(
+        user.id,
+        user.email,
+        user.password,
+        user.firstName,
+        user.lastName,
+        user.role,
+        user.isEmailVerified,
+        user.createdById!,
+        user.createdAt,
+        user.updatedAt,
+      );
+      userEntity.schools = user.schools.map((s) => ({
+        id: s.school.id,
+        name: s.school.name,
+      }));
+      return userEntity;
     });
   }
 }

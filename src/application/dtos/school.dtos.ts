@@ -17,6 +17,8 @@ export class CreateSchoolRequestDto {
   mail: string;
   @ApiProperty({ example: 'https://www.escuela.edu.hn' })
   website: string;
+  @ApiProperty({ type: 'string', format: 'binary', required: true })
+  image: string;
 }
 
 export class CreateSchoolResponseDto {
@@ -100,4 +102,6 @@ export class UpdateSchoolRequestDto {
   mail?: string;
   @ApiProperty({ example: 'https://www.escuela.edu.hn', required: false })
   website?: string;
+  @ApiProperty({ type: 'string', format: 'binary', required: false })
+  image?: string;
 }

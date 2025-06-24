@@ -59,40 +59,6 @@ export class PrismaSchoolRepository implements SchoolRepository {
     );
   }
 
-  async searchSchools(name?: string, page = 1, limit = 10): Promise<School[]> {
-    const whereCondition = name
-      ? {
-          name: {
-            contains: name,
-            mode: 'insensitive' as const,
-          },
-        }
-      : {};
-
-    const schools = await this.prisma.school.findMany({
-      where: whereCondition,
-      skip: (page - 1) * limit,
-      take: limit,
-    });
-
-    return schools.map(
-      (s) =>
-        new School(
-          s.id,
-          s.name,
-          s.address ?? undefined,
-          s.phone ?? undefined,
-          s.imgUrl ?? undefined,
-          s.department ?? undefined,
-          s.municipality ?? undefined,
-          s.mail ?? undefined,
-          s.website ?? undefined,
-          s.createdAt,
-          s.updatedAt,
-        ),
-    );
-  }
-
   async searchSchoolsWithCount(
     name?: string,
     page = 1,

@@ -49,6 +49,13 @@ import { UpdateSchoolUseCase } from 'src/application/use-case/school/update-scho
     JwtAuthGuard,
     NestJsJwtService,
   ],
-  exports: ['JwtService', JwtAuthGuard],
+  exports: [
+    'JwtService',
+    JwtAuthGuard,
+    {
+      provide: 'SchoolRepository',
+      useClass: PrismaSchoolRepository,
+    },
+  ],
 })
 export class SchoolModule {}

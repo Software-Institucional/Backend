@@ -2,11 +2,6 @@ import { School } from 'src/domain/entities/school/school.entity';
 
 export interface SchoolRepository {
   createSchool(school: School): Promise<School>;
-  searchSchools(
-    name?: string,
-    page?: number,
-    limit?: number,
-  ): Promise<School[]>;
   searchSchoolsWithCount(
     name?: string,
     page?: number,

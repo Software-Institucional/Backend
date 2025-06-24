@@ -2,6 +2,8 @@ import { Role } from '@prisma/client';
 import * as crypto from 'crypto';
 
 export class User {
+  public schools?: { id: string; name: string }[];
+
   constructor(
     public readonly id: string,
     public readonly email: string,
@@ -9,8 +11,8 @@ export class User {
     public readonly firstName: string,
     public readonly lastName: string,
     public readonly role: Role,
-    public readonly schoolId?: string,
     public readonly isEmailVerified: boolean = false,
+    public readonly createdById?: string,
     public readonly createdAt: Date = new Date(),
     public readonly updatedAt: Date = new Date(),
   ) {}
@@ -21,7 +23,7 @@ export class User {
     firstName: string,
     lastName: string,
     role: Role,
-    schoolId?: string,
+    createdById?: string,
   ): User {
     return new User(
       crypto.randomUUID(),
@@ -30,7 +32,10 @@ export class User {
       firstName,
       lastName,
       role,
-      schoolId,
+      false,
+      createdById,
+      new Date(),
+      new Date(),
     );
   }
 
@@ -42,8 +47,8 @@ export class User {
       this.firstName,
       this.lastName,
       this.role,
-      this.schoolId,
       this.isEmailVerified,
+      this.createdById,
       this.createdAt,
       new Date(),
     );
@@ -57,8 +62,8 @@ export class User {
       this.firstName,
       this.lastName,
       this.role,
-      this.schoolId,
       true,
+      this.createdById,
       this.createdAt,
       new Date(),
     );

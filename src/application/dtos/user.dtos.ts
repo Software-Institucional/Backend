@@ -33,6 +33,7 @@ export class LoginResponseDto {
       email: 'usuario@email.com',
       firstName: 'Juan',
       lastName: 'Pérez',
+      role: 'ADMIN',
     },
   })
   user: {
@@ -41,7 +42,6 @@ export class LoginResponseDto {
     firstName: string;
     lastName: string;
     role: Role;
-    schoolId?: string;
   };
 }
 
@@ -72,12 +72,21 @@ export class RegisterRequestDto {
   email: string;
   @ApiProperty({ example: 'Juan' })
   firstName: string;
-  @ApiProperty({ example: 'ADMIN', enum: ['SUPER', 'ADMIN'] })
+  @ApiProperty({ example: 'ADMIN', enum: ['SUPER', 'ADMIN', 'DOCENTE'] })
   role: Role;
   @ApiProperty({ example: 'Pérez' })
   lastName: string;
-  @ApiProperty({ example: 'uuid-colegio', required: false })
-  schoolId?: string;
+  @ApiProperty({
+    example: [
+      { schoolId: 'uuid-colegio-1', sedeIds: ['uuid-sede-1', 'uuid-sede-2'] },
+      { schoolId: 'uuid-colegio-2', sedeIds: ['uuid-sede-3'] },
+      { schoolId: 'uuid-colegio-3' },
+    ],
+    required: false,
+    description:
+      'Lista de colegios y sedes (opcional) a los que el usuario tendrá acceso',
+  })
+  schools?: { schoolId: string; sedeIds?: string[] }[];
 }
 
 export class RegisterResponseDto {
@@ -88,7 +97,7 @@ export class RegisterResponseDto {
       firstName: 'Juan',
       lastName: 'Pérez',
       role: 'ADMIN',
-      schoolId: 'uuid-colegio',
+      schoolId: ['uuid-colegio'],
       message:
         'Usuario registrado exitosamente. Por favor revisa tu correo para la verificación.',
     },
@@ -117,4 +126,33 @@ export class ResetPasswordResponseDto {
       'Password has been reset successfully. Please log in with your new password.',
   })
   message: string;
+}
+
+export class AllUserResponseDto {
+  @ApiProperty({
+    isArray: true,
+    example: [
+      {
+        id: 'uuid-user-1',
+        email: 'user1@email.com',
+        firstName: 'Usuario',
+        lastName: 'Uno',
+        role: 'DOCENTE',
+        isEmailVerified: true,
+        schools: [{ id: 'uuid-school', name: 'Colegio A' }],
+      },
+    ],
+  })
+  users: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: Role;
+    isEmailVerified: boolean;
+    schools?: {
+      id: string;
+      name: string;
+    }[];
+  }[];
 }

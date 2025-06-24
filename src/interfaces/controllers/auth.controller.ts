@@ -8,16 +8,17 @@ import {
   Get,
   Req,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
-import { ForgotPasswordUseCase } from 'src/application/use-case/auth/forgot-password.use-case';
-import { LoginUseCase } from 'src/application/use-case/auth/login.use-case';
-import { LogoutUseCase } from 'src/application/use-case/auth/logout.use-case';
-import { RefreshTokenUseCase } from 'src/application/use-case/auth/refresh-token.use-case';
-import { RegisterUseCase } from 'src/application/use-case/auth/register.use-case';
-import { ResetPasswordUseCase } from 'src/application/use-case/auth/reset-password.use-case';
-import { Response, Request } from 'express';
 import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import {
+  AllUserResponseDto,
   ForgotPasswordRequestDto,
   ForgotPasswordResponseDto,
   LoginRequestDto,
@@ -29,7 +30,17 @@ import {
   ResetPasswordRequestDto,
   ResetPasswordResponseDto,
 } from 'src/application/dtos/user.dtos';
+import { Request, Response } from 'express';
+import { JwtAuthGuard } from 'src/infrastructure/guards/jwt.auth.guard';
+import { JwtPayload } from 'src/domain/interfaces/jwt-payload.interface';
 import { RequestWithCookies } from 'src/types/express';
+import { ForgotPasswordUseCase } from 'src/application/use-case/auth/forgot-password.use-case';
+import { LoginUseCase } from 'src/application/use-case/auth/login.use-case';
+import { LogoutUseCase } from 'src/application/use-case/auth/logout.use-case';
+import { RefreshTokenUseCase } from 'src/application/use-case/auth/refresh-token.use-case';
+import { RegisterUseCase } from 'src/application/use-case/auth/register.use-case';
+import { ResetPasswordUseCase } from 'src/application/use-case/auth/reset-password.use-case';
+import { AllUSerUseCase } from 'src/application/use-case/auth/all-user-register.use-case';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -41,6 +52,7 @@ export class AuthController {
     private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
     private readonly resetPasswordUseCase: ResetPasswordUseCase,
     private readonly logoutUseCase: LogoutUseCase,
+    private readonly allUserUseCase: AllUSerUseCase,
   ) {}
 
   private getCookieConfig(req: Request) {
@@ -226,5 +238,21 @@ export class AuthController {
     });
 
     return { message: 'Logged out successfully' };
+  }
+
+  @Get('view-registered')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'View users registered by the current user' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of registered users',
+    type: AllUserResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async view(
+    @Req() req: Request & { user: JwtPayload },
+  ): Promise<AllUserResponseDto> {
+    return this.allUserUseCase.allUser({ user: req.user });
   }
 }

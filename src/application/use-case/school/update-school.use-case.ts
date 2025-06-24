@@ -45,6 +45,10 @@ export class UpdateSchoolUseCase {
 
     let imgUrl = currentSchool.imgUrl;
     if (file) {
+      // Si hay imagen previa, la borramos de S3
+      if (imgUrl) {
+        await this.s3Service.deleteFile(imgUrl);
+      }
       imgUrl = await this.s3Service.uploadFile(file);
     }
 

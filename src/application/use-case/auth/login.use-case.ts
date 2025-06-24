@@ -48,10 +48,12 @@ export class LoginUseCase {
       );
     }
 
-    if (user.role !== 'SUPER' && request.schoolId !== user.schoolId) {
-      throw new BadRequestException(
-        'No tienes acceso a esta Escuela Verifica la Institucion',
-      );
+    if (user.role !== 'SUPER' && request.schoolId) {
+      if (!user.schools?.some((s) => s.id === request.schoolId)) {
+        throw new BadRequestException(
+          'No tienes acceso a esta Escuela. Verifica la Institución.',
+        );
+      }
     }
 
     // Generate tokens
@@ -79,7 +81,6 @@ export class LoginUseCase {
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
-        schoolId: user.schoolId,
       },
     };
   }

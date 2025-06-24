@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { ForgotPasswordUseCase } from 'src/application/use-case/auth/forgot-password.use-case';
 import { LoginUseCase } from 'src/application/use-case/auth/login.use-case';
@@ -16,11 +16,25 @@ import { NestJsJwtService } from 'src/infrastructure/services/nest-jwt.service';
 import { BrevoEmailService } from 'src/infrastructure/services/brevo-email.service';
 import { PrismaUserRepository } from 'src/infrastructure/repositories/auth/prisma-user.repository';
 import { PrismaRefreshTokenRepository } from 'src/infrastructure/repositories/auth/prisma-refresh-token.repository';
+import { SchoolModule } from './school.module';
+import { AllUSerUseCase } from 'src/application/use-case/auth/all-user-register.use-case';
+import { PrismaSedeRepository } from 'src/infrastructure/repositories/sede/prisma-sede.repository';
 
 // Use Cases
 
 @Module({
-  imports: [ConfigModule, JwtModule.register({}), PrismaModule],
+  imports: [
+    ConfigModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_ACCESS_SECRET'),
+      }),
+    }),
+    PrismaModule,
+    SchoolModule,
+  ],
   controllers: [AuthController],
   providers: [
     // Use Cases
@@ -30,8 +44,11 @@ import { PrismaRefreshTokenRepository } from 'src/infrastructure/repositories/au
     ForgotPasswordUseCase,
     ResetPasswordUseCase,
     LogoutUseCase,
+    AllUSerUseCase,
     // Guards
     JwtAuthGuard,
+    NestJsJwtService,
+
     {
       provide: 'UserRepository',
       useClass: PrismaUserRepository,
@@ -49,14 +66,14 @@ import { PrismaRefreshTokenRepository } from 'src/infrastructure/repositories/au
       useClass: BcryptPasswordService,
     },
     {
-      provide: 'JwtService',
-      useClass: NestJsJwtService,
-    },
-    {
       provide: 'EmailService',
       useClass: BrevoEmailService,
     },
+    {
+      provide: 'SedeRepository',
+      useClass: PrismaSedeRepository,
+    },
   ],
-  exports: [JwtAuthGuard],
+  exports: [NestJsJwtService, JwtAuthGuard],
 })
 export class AuthModule {}
