@@ -29,6 +29,7 @@ async function bootstrap() {
         callback(new Error('Not allowed by CORS'));
       }
     },
+    credentials: true,
   });
 
   const config = new DocumentBuilder()
