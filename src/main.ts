@@ -10,15 +10,25 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-      'http://192.168.56.1:3000',
-      'https://client-software-mirro.vercel.app/',
-      'https://www.eduadminsoft.shop',
-      'https://eduadminsoft.shop',
-    ],
-    credentials: true,
+    origin: function (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) {
+      const allowedOrigins = [
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+        'http://192.168.56.1:3000',
+        'https://client-software-mirro.vercel.app',
+        'https://www.eduadminsoft.shop',
+        'https://eduadminsoft.shop',
+      ];
+
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
   });
 
   const config = new DocumentBuilder()
