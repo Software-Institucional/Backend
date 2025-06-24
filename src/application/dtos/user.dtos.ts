@@ -87,6 +87,12 @@ export class RegisterRequestDto {
       'Lista de colegios y sedes (opcional) a los que el usuario tendrá acceso',
   })
   schools?: { schoolId: string; sedeIds?: string[] }[];
+  @ApiProperty({
+    example: 'uuid-creador',
+    required: false,
+    description: 'ID del usuario que crea este usuario',
+  })
+  createdById?: string;
 }
 
 export class RegisterResponseDto {
@@ -100,6 +106,7 @@ export class RegisterResponseDto {
       schoolId: ['uuid-colegio'],
       message:
         'Usuario registrado exitosamente. Por favor revisa tu correo para la verificación.',
+      createdById: 'uuid-creador',
     },
   })
   user: {
@@ -110,6 +117,7 @@ export class RegisterResponseDto {
     role?: Role;
     schoolId?: string;
     message: string;
+    createdById?: string;
   };
 }
 

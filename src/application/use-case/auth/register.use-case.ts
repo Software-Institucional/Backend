@@ -28,7 +28,7 @@ export class RegisterUseCase {
   ) {}
 
   async execute(request: RegisterRequestDto): Promise<RegisterResponseDto> {
-    const { email, role, firstName, lastName, schools } = request;
+    const { email, role, firstName, lastName, schools, createdById } = request;
 
     // Validar usuario existente
     const existingUser = await this.userRepository.findByEmail(email);
@@ -67,7 +67,14 @@ export class RegisterUseCase {
     // Crear usuario
     const tempPassword = Math.random().toString(36).slice(-8);
     const hashedPassword = await this.passwordService.hash(tempPassword);
-    const user = User.create(email, hashedPassword, firstName, lastName, role);
+    const user = User.create(
+      email,
+      hashedPassword,
+      firstName,
+      lastName,
+      role,
+      createdById,
+    );
 
     // Guardar usuario y relaciones
     const savedUser = await this.userRepository.save(user, schools);
@@ -82,6 +89,7 @@ export class RegisterUseCase {
         firstName: savedUser.firstName,
         lastName: savedUser.lastName,
         role: savedUser.role,
+        createdById: savedUser.createdById,
         message:
           'Usuario registrado exitosamente. Por favor revisa tu correo para la verificación.',
       },
