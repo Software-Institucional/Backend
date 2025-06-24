@@ -39,8 +39,8 @@ export class RegisterUseCase {
       hashedPassword,
       request.firstName,
       request.lastName,
-      request.Role,
-      request.shoolId,
+      request.role,
+      request.schoolId,
     );
 
     // Save user
@@ -63,7 +63,7 @@ export class RegisterUseCase {
         firstName: savedUser.firstName,
         lastName: savedUser.lastName,
         role: savedUser.role,
-        shoolId: savedUser.schoolId!,
+        schoolId: savedUser.schoolId!,
         message:
           'Usuario registrado exitosamente. Por favor revisa tu correo para la verificación.',
       },

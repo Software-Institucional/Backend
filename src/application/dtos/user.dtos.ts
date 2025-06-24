@@ -73,11 +73,11 @@ export class RegisterRequestDto {
   @ApiProperty({ example: 'Juan' })
   firstName: string;
   @ApiProperty({ example: 'ADMIN', enum: ['SUPER', 'ADMIN'] })
-  Role: Role;
+  role: Role;
   @ApiProperty({ example: 'Pérez' })
   lastName: string;
-  @ApiProperty({ example: 'uuid-colegio' })
-  shoolId: string;
+  @ApiProperty({ example: 'uuid-colegio', required: false })
+  schoolId?: string;
 }
 
 export class RegisterResponseDto {
@@ -88,7 +88,7 @@ export class RegisterResponseDto {
       firstName: 'Juan',
       lastName: 'Pérez',
       role: 'ADMIN',
-      shoolId: 'uuid-colegio',
+      schoolId: 'uuid-colegio',
       message:
         'Usuario registrado exitosamente. Por favor revisa tu correo para la verificación.',
     },
@@ -99,7 +99,7 @@ export class RegisterResponseDto {
     firstName: string;
     lastName: string;
     role?: Role;
-    shoolId: string;
+    schoolId?: string;
     message: string;
   };
 }

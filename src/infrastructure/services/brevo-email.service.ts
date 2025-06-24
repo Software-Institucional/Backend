@@ -38,7 +38,7 @@ export class BrevoEmailService implements EmailService {
   }
 
   async sendPasswordResetEmail(email: string, token: string): Promise<void> {
-    const resetUrl = `${this.configService.get('FRONTEND_URL')}/reset-password?token=${token}`;
+    const resetUrl = `${this.configService.get('FRONTEND_URL')}reset-password?token=${token}`;
 
     const emailData: BrevoEmailRequest = {
       sender: {
