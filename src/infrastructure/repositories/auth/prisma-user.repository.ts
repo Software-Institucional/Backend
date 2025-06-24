@@ -11,7 +11,7 @@ export class PrismaUserRepository implements UserRepository {
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: {
-        schools: { include: { school: true } },
+        schools: { include: { school: true, sede: true } },
       },
     });
 
@@ -32,6 +32,28 @@ export class PrismaUserRepository implements UserRepository {
     userEntity.schools = user.schools.map((s) => ({
       id: s.school.id,
       name: s.school.name,
+      address: s.school.address ?? undefined,
+      phone: s.school.phone ?? undefined,
+      imgUrl: s.school.imgUrl ?? undefined,
+      department: s.school.department ?? undefined,
+      municipality: s.school.municipality ?? undefined,
+      mail: s.school.mail ?? undefined,
+      website: s.school.website ?? undefined,
+      createdAt: s.school.createdAt,
+      updatedAt: s.school.updatedAt,
+      sedes:
+        s.sede && typeof s.sede === 'object'
+          ? [
+              {
+                id: s.sede.id,
+                name: s.sede.name,
+                address: s.sede.address ?? undefined,
+                phone: s.sede.phone ?? undefined,
+                createdAt: s.sede.createdAt,
+                updatedAt: s.sede.updatedAt,
+              },
+            ]
+          : [],
     }));
     return userEntity;
   }
@@ -39,7 +61,7 @@ export class PrismaUserRepository implements UserRepository {
   async findByEmail(email: string): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
       where: { email },
-      include: { schools: { include: { school: true } } },
+      include: { schools: { include: { school: true, sede: true } } },
     });
 
     if (!user) return null;
@@ -59,6 +81,28 @@ export class PrismaUserRepository implements UserRepository {
     userEntity.schools = user.schools.map((s) => ({
       id: s.school.id,
       name: s.school.name,
+      address: s.school.address ?? undefined,
+      phone: s.school.phone ?? undefined,
+      imgUrl: s.school.imgUrl ?? undefined,
+      department: s.school.department ?? undefined,
+      municipality: s.school.municipality ?? undefined,
+      mail: s.school.mail ?? undefined,
+      website: s.school.website ?? undefined,
+      createdAt: s.school.createdAt,
+      updatedAt: s.school.updatedAt,
+      sedes:
+        s.sede && typeof s.sede === 'object'
+          ? [
+              {
+                id: s.sede.id,
+                name: s.sede.name,
+                address: s.sede.address ?? undefined,
+                phone: s.sede.phone ?? undefined,
+                createdAt: s.sede.createdAt,
+                updatedAt: s.sede.updatedAt,
+              },
+            ]
+          : [],
     }));
     return userEntity;
   }
@@ -158,7 +202,7 @@ export class PrismaUserRepository implements UserRepository {
     const users = await this.prisma.user.findMany({
       where: { createdById: id },
       include: {
-        schools: { include: { school: true } },
+        schools: { include: { school: true, sede: true } },
       },
     });
 
@@ -178,6 +222,28 @@ export class PrismaUserRepository implements UserRepository {
       userEntity.schools = user.schools.map((s) => ({
         id: s.school.id,
         name: s.school.name,
+        address: s.school.address ?? undefined,
+        phone: s.school.phone ?? undefined,
+        imgUrl: s.school.imgUrl ?? undefined,
+        department: s.school.department ?? undefined,
+        municipality: s.school.municipality ?? undefined,
+        mail: s.school.mail ?? undefined,
+        website: s.school.website ?? undefined,
+        createdAt: s.school.createdAt,
+        updatedAt: s.school.updatedAt,
+        sedes:
+          s.sede && typeof s.sede === 'object'
+            ? [
+                {
+                  id: s.sede.id,
+                  name: s.sede.name,
+                  address: s.sede.address ?? undefined,
+                  phone: s.sede.phone ?? undefined,
+                  createdAt: s.sede.createdAt,
+                  updatedAt: s.sede.updatedAt,
+                },
+              ]
+            : [],
       }));
       return userEntity;
     });

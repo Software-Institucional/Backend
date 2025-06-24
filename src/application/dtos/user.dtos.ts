@@ -136,6 +136,31 @@ export class ResetPasswordResponseDto {
   message: string;
 }
 
+export class SchoolDto {
+  @ApiProperty()
+  id: string;
+  @ApiProperty()
+  name: string;
+  @ApiProperty({ required: false })
+  address?: string;
+  @ApiProperty({ required: false })
+  phone?: string;
+  @ApiProperty({ required: false })
+  imgUrl?: string;
+  @ApiProperty({ required: false })
+  department?: string;
+  @ApiProperty({ required: false })
+  municipality?: string;
+  @ApiProperty({ required: false })
+  mail?: string;
+  @ApiProperty({ required: false })
+  website?: string;
+  @ApiProperty()
+  createdAt: Date;
+  @ApiProperty()
+  updatedAt: Date;
+}
+
 export class AllUserResponseDto {
   @ApiProperty({
     isArray: true,
@@ -147,7 +172,21 @@ export class AllUserResponseDto {
         lastName: 'Uno',
         role: 'DOCENTE',
         isEmailVerified: true,
-        schools: [{ id: 'uuid-school', name: 'Colegio A' }],
+        schools: [
+          {
+            id: 'uuid-school',
+            name: 'Colegio A',
+            address: 'Calle 123',
+            phone: '123456',
+            imgUrl: null,
+            department: 'Antioquia',
+            municipality: 'Medellín',
+            mail: 'colegio@mail.com',
+            website: 'www.colegio.com',
+            createdAt: '2024-01-01T00:00:00.000Z',
+            updatedAt: '2024-01-01T00:00:00.000Z',
+          },
+        ],
       },
     ],
   })
@@ -158,9 +197,6 @@ export class AllUserResponseDto {
     lastName: string;
     role: Role;
     isEmailVerified: boolean;
-    schools?: {
-      id: string;
-      name: string;
-    }[];
+    schools?: SchoolDto[];
   }[];
 }

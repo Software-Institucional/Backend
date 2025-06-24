@@ -35,6 +35,12 @@ export class RegisterUseCase {
     if (existingUser) {
       throw new ConflictException('El correo electrónico ya está en uso');
     }
+    if (createdById) {
+      const creator = await this.userRepository.findById(createdById);
+      if (!creator) {
+        throw new BadRequestException('El usuario creador no existe');
+      }
+    }
 
     // Validar colegios y sedes
     if (schools && schools.length > 0) {
