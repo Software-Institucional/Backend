@@ -1,6 +1,17 @@
 import * as crypto from 'crypto';
 
+export interface SedeEntity {
+  id: string;
+  name: string;
+  address?: string;
+  phone?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export class School {
+  public sedes?: SedeEntity[];
+
   constructor(
     public readonly id: string,
     public readonly name: string,
@@ -11,6 +22,7 @@ export class School {
     public readonly municipality?: string,
     public readonly mail?: string,
     public readonly website?: string,
+    public readonly activate?: boolean,
     public readonly createdAt: Date = new Date(),
     public readonly updatedAt: Date = new Date(),
   ) {}

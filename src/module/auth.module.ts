@@ -19,6 +19,7 @@ import { PrismaRefreshTokenRepository } from 'src/infrastructure/repositories/au
 import { SchoolModule } from './school.module';
 import { AllUSerUseCase } from 'src/application/use-case/auth/all-user-register.use-case';
 import { PrismaSedeRepository } from 'src/infrastructure/repositories/sede/prisma-sede.repository';
+import { UpdateUserUseCase } from 'src/application/use-case/auth/update-user.use-case';
 
 // Use Cases
 
@@ -45,6 +46,7 @@ import { PrismaSedeRepository } from 'src/infrastructure/repositories/sede/prism
     ResetPasswordUseCase,
     LogoutUseCase,
     AllUSerUseCase,
+    UpdateUserUseCase,
     // Guards
     JwtAuthGuard,
     NestJsJwtService,

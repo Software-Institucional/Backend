@@ -14,6 +14,7 @@ export class User {
     public readonly role: Role,
     public readonly isEmailVerified: boolean = false,
     public readonly createdById?: string,
+    public readonly activate: boolean = true,
     public readonly createdAt: Date = new Date(),
     public readonly updatedAt: Date = new Date(),
   ) {}
@@ -35,6 +36,7 @@ export class User {
       role,
       false,
       createdById,
+      true,
       new Date(),
       new Date(),
     );
@@ -50,6 +52,7 @@ export class User {
       this.role,
       this.isEmailVerified,
       this.createdById,
+      this.activate,
       this.createdAt,
       new Date(),
     );
@@ -65,6 +68,7 @@ export class User {
       this.role,
       true,
       this.createdById,
+      this.activate,
       this.createdAt,
       new Date(),
     );

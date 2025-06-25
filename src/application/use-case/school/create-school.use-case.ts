@@ -67,6 +67,7 @@ export class CreateSchoolUseCase {
         municipality: savedSchool.municipality!,
         mail: savedSchool.mail!,
         website: savedSchool.website!,
+        sedes: savedSchool.sedes || [],
       },
     };
   }

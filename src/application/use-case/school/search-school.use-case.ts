@@ -35,6 +35,15 @@ export class SearchSchoolUseCase {
           municipality: s.municipality ?? '',
           mail: s.mail ?? '',
           website: s.website ?? '',
+          sedes:
+            s.sedes?.map((sede) => ({
+              id: sede.id,
+              name: sede.name,
+              address: sede.address,
+              phone: sede.phone,
+              createdAt: sede.createdAt,
+              updatedAt: sede.updatedAt,
+            })) || [],
         },
       })),
       metadata: {

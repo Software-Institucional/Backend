@@ -9,6 +9,8 @@ import {
   Req,
   UnauthorizedException,
   UseGuards,
+  Query,
+  Put,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -29,6 +31,10 @@ import {
   RegisterResponseDto,
   ResetPasswordRequestDto,
   ResetPasswordResponseDto,
+  AllUserRequestDto,
+  AllUsersBySchoolResponseDto,
+  UpdateUserRequestDto,
+  UpdateUserResponseDto,
 } from 'src/application/dtos/user.dtos';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from 'src/infrastructure/guards/jwt.auth.guard';
@@ -41,6 +47,7 @@ import { RefreshTokenUseCase } from 'src/application/use-case/auth/refresh-token
 import { RegisterUseCase } from 'src/application/use-case/auth/register.use-case';
 import { ResetPasswordUseCase } from 'src/application/use-case/auth/reset-password.use-case';
 import { AllUSerUseCase } from 'src/application/use-case/auth/all-user-register.use-case';
+import { UpdateUserUseCase } from 'src/application/use-case/auth/update-user.use-case';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -53,6 +60,7 @@ export class AuthController {
     private readonly resetPasswordUseCase: ResetPasswordUseCase,
     private readonly logoutUseCase: LogoutUseCase,
     private readonly allUserUseCase: AllUSerUseCase,
+    private readonly updateUserUseCase: UpdateUserUseCase,
   ) {}
 
   private getCookieConfig(req: Request) {
@@ -252,7 +260,34 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async view(
     @Req() req: Request & { user: JwtPayload },
-  ): Promise<AllUserResponseDto> {
-    return this.allUserUseCase.allUser({ user: req.user });
+    @Query() query: AllUserRequestDto,
+  ): Promise<AllUserResponseDto | AllUsersBySchoolResponseDto> {
+    return this.allUserUseCase.allUser({ user: req.user, ...query });
+  }
+
+  @Put('update-user')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Update user data' })
+  @ApiBody({ type: UpdateUserRequestDto })
+  @ApiResponse({
+    status: 200,
+    description: 'User updated successfully',
+    type: UpdateUserResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Insufficient permissions',
+  })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async updateUser(
+    @Body() request: UpdateUserRequestDto,
+    @Req() req: Request & { user: JwtPayload },
+  ): Promise<UpdateUserResponseDto> {
+    return this.updateUserUseCase.execute({
+      ...request,
+      user: req.user,
+    });
   }
 }

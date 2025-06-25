@@ -20,6 +20,7 @@ export class PrismaSchoolRepository implements SchoolRepository {
         municipality: school.municipality,
         mail: school.mail,
         website: school.website,
+        activate: school.activate,
         createdAt: school.createdAt,
         updatedAt: school.updatedAt,
       },
@@ -34,17 +35,23 @@ export class PrismaSchoolRepository implements SchoolRepository {
       createdSchool.municipality ?? undefined,
       createdSchool.mail ?? undefined,
       createdSchool.website ?? undefined,
+      Boolean(createdSchool.activate),
       createdSchool.createdAt,
       createdSchool.updatedAt,
     );
   }
 
   async findById(id: string): Promise<School | null> {
-    const school = await this.prisma.school.findUnique({ where: { id } });
+    const school = await this.prisma.school.findUnique({
+      where: { id },
+      include: {
+        sedes: true,
+      },
+    });
     if (!school) {
       return null;
     }
-    return new School(
+    const schoolEntity = new School(
       school.id,
       school.name,
       school.address ?? undefined,
@@ -54,9 +61,19 @@ export class PrismaSchoolRepository implements SchoolRepository {
       school.municipality ?? undefined,
       school.mail ?? undefined,
       school.website ?? undefined,
+      Boolean(school.activate),
       school.createdAt,
       school.updatedAt,
     );
+    schoolEntity.sedes = school.sedes.map((sede) => ({
+      id: sede.id,
+      name: sede.name,
+      address: sede.address ?? undefined,
+      phone: sede.phone ?? undefined,
+      createdAt: sede.createdAt,
+      updatedAt: sede.updatedAt,
+    }));
+    return schoolEntity;
   }
 
   async searchSchoolsWithCount(
@@ -76,6 +93,9 @@ export class PrismaSchoolRepository implements SchoolRepository {
     const [schools, total] = await Promise.all([
       this.prisma.school.findMany({
         where: whereCondition,
+        include: {
+          sedes: true,
+        },
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -85,22 +105,31 @@ export class PrismaSchoolRepository implements SchoolRepository {
     ]);
 
     return {
-      schools: schools.map(
-        (s) =>
-          new School(
-            s.id,
-            s.name,
-            s.address ?? undefined,
-            s.phone ?? undefined,
-            s.imgUrl ?? undefined,
-            s.department ?? undefined,
-            s.municipality ?? undefined,
-            s.mail ?? undefined,
-            s.website ?? undefined,
-            s.createdAt,
-            s.updatedAt,
-          ),
-      ),
+      schools: schools.map((s) => {
+        const schoolEntity = new School(
+          s.id,
+          s.name,
+          s.address ?? undefined,
+          s.phone ?? undefined,
+          s.imgUrl ?? undefined,
+          s.department ?? undefined,
+          s.municipality ?? undefined,
+          s.mail ?? undefined,
+          s.website ?? undefined,
+          Boolean(s.activate),
+          s.createdAt,
+          s.updatedAt,
+        );
+        schoolEntity.sedes = s.sedes.map((sede) => ({
+          id: sede.id,
+          name: sede.name,
+          address: sede.address ?? undefined,
+          phone: sede.phone ?? undefined,
+          createdAt: sede.createdAt,
+          updatedAt: sede.updatedAt,
+        }));
+        return schoolEntity;
+      }),
       total,
     };
   }
@@ -117,6 +146,7 @@ export class PrismaSchoolRepository implements SchoolRepository {
         municipality: school.municipality,
         mail: school.mail,
         website: school.website,
+        activate: school.activate,
         updatedAt: new Date(),
       },
     });
@@ -130,6 +160,7 @@ export class PrismaSchoolRepository implements SchoolRepository {
       updatedSchool.municipality ?? undefined,
       updatedSchool.mail ?? undefined,
       updatedSchool.website ?? undefined,
+      Boolean(updatedSchool.activate),
       updatedSchool.createdAt,
       updatedSchool.updatedAt,
     );

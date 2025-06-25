@@ -23,6 +23,7 @@ model User {
   isEmailVerified Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt()
+  activate        Boolean  @default(true)
 
   RefreshToken RefreshToken[]
   schools      SchoolsOnUsers[]
@@ -66,6 +67,7 @@ model School {
   municipality String?
   mail         String?
   website      String?
+  activate     Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

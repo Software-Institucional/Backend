@@ -1,6 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { JwtPayload } from 'src/domain/interfaces/jwt-payload.interface';
 
+export interface SedeDto {
+  id: string;
+  name: string;
+  address?: string;
+  phone?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export class CreateSchoolRequestDto {
   user: JwtPayload;
   @ApiProperty({ example: 'Escuela Nacional de Ciencias' })
@@ -33,6 +42,16 @@ export class CreateSchoolResponseDto {
       municipality: 'Tegucigalpa',
       mail: 'escuela@email.com',
       website: 'https://www.escuela.edu.hn',
+      sedes: [
+        {
+          id: 'sede-1',
+          name: 'Sede Principal',
+          address: 'Calle 123',
+          phone: '+50412345678',
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+        },
+      ],
     },
   })
   school: {
@@ -45,6 +64,7 @@ export class CreateSchoolResponseDto {
     municipality: string;
     mail: string;
     website: string;
+    sedes: SedeDto[];
   };
 }
 
@@ -63,9 +83,46 @@ export class SearchSchoolRequestDto {
 export class SearchSchoolResponseDto {
   @ApiProperty({
     description: 'Lista de colegios encontrados',
-    type: [CreateSchoolResponseDto],
+    example: [
+      {
+        school: {
+          id: '1',
+          name: 'Escuela Nacional de Ciencias',
+          address: 'Calle 123, Barrio Centro',
+          phone: '+50498765432',
+          imgUrl: 'https://s3.amazonaws.com/bucket/escuela.jpg',
+          department: 'Francisco Morazán',
+          municipality: 'Tegucigalpa',
+          mail: 'escuela@email.com',
+          website: 'https://www.escuela.edu.hn',
+          sedes: [
+            {
+              id: 'sede-1',
+              name: 'Sede Principal',
+              address: 'Calle 123',
+              phone: '+50412345678',
+              createdAt: '2024-01-01T00:00:00.000Z',
+              updatedAt: '2024-01-01T00:00:00.000Z',
+            },
+          ],
+        },
+      },
+    ],
   })
-  schools: CreateSchoolResponseDto[];
+  schools: {
+    school: {
+      id: string;
+      name: string;
+      address: string;
+      phone: string;
+      imgUrl: string;
+      department: string;
+      municipality: string;
+      mail: string;
+      website: string;
+      sedes: SedeDto[];
+    };
+  }[];
 
   @ApiProperty({
     description: 'Metadatos de paginación',

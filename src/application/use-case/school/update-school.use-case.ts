@@ -62,6 +62,7 @@ export class UpdateSchoolUseCase {
       request.municipality ?? currentSchool.municipality,
       request.mail ?? currentSchool.mail,
       request.website ?? currentSchool.website,
+      currentSchool.activate,
       currentSchool.createdAt,
       new Date(),
     );
@@ -81,6 +82,7 @@ export class UpdateSchoolUseCase {
         municipality: savedSchool.municipality ?? '',
         mail: savedSchool.mail ?? '',
         website: savedSchool.website ?? '',
+        sedes: savedSchool.sedes || [],
       },
     };
   }

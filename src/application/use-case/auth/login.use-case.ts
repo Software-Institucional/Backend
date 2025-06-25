@@ -41,6 +41,10 @@ export class LoginUseCase {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
+    if (!user.activate) {
+      throw new BadRequestException('Tu cuenta no está activa.');
+    }
+
     // Check if email is verified
     if (!user.isEmailVerified) {
       throw new BadRequestException(
@@ -81,6 +85,7 @@ export class LoginUseCase {
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
+        activate: user.activate,
       },
     };
   }
