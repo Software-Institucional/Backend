@@ -27,7 +27,10 @@ export class AllUSerUseCase {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    const { search, role, schoolId, page = 1, limit = 10 } = request;
+    // Convertir page y limit a números
+    const page = parseInt(request.page?.toString() || '1', 10);
+    const limit = parseInt(request.limit?.toString() || '10', 10);
+    const { search, role, schoolId } = request;
 
     // Para SUPER: ver todos los usuarios agrupados por colegio
     if (user.role === 'SUPER') {
