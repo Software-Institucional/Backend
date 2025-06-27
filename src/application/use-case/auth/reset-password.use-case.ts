@@ -53,7 +53,7 @@ export class ResetPasswordUseCase {
 
     return {
       message:
-        'Password has been reset successfully. Please log in with your new password.',
+        'La contraseña ha sido restablecida exitosamente. Por favor inicia sesión con tu nueva contraseña.',
     };
   }
 }

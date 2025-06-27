@@ -59,24 +59,43 @@ export class AllUSerUseCase {
             createdAt: schoolData.school.createdAt,
             updatedAt: schoolData.school.updatedAt,
           },
-          users: schoolData.users.map((u) => {
-            // Encontrar las sedes específicas de este colegio para este usuario
-            const userSchool = u.schools?.find(
-              (s) => s.id === schoolData.school.id,
-            );
-            const sedes = userSchool?.sedes || [];
-
-            return {
-              id: u.id,
-              email: u.email,
-              firstName: u.firstName,
-              lastName: u.lastName,
-              role: u.role,
-              isEmailVerified: u.isEmailVerified,
-              activate: u.activate,
-              sedes: sedes,
-            };
-          }),
+          users: schoolData.users.map((u) => ({
+            id: u.id,
+            email: u.email,
+            firstName: u.firstName,
+            lastName: u.lastName,
+            role: u.role,
+            isEmailVerified: u.isEmailVerified,
+            activate: u.activate,
+            school: u.school
+              ? {
+                  id: u.school.id,
+                  name: u.school.name,
+                  address: u.school.address,
+                  phone: u.school.phone,
+                  imgUrl: u.school.imgUrl,
+                  department: u.school.department,
+                  municipality: u.school.municipality,
+                  mail: u.school.mail,
+                  website: u.school.website,
+                  createdAt: u.school.createdAt,
+                  updatedAt: u.school.updatedAt,
+                }
+              : null,
+            sedes:
+              u.sede && u.sede.id
+                ? [
+                    {
+                      id: u.sede.id,
+                      name: u.sede.name,
+                      address: u.sede.address,
+                      phone: u.sede.phone,
+                      createdAt: u.sede.createdAt,
+                      updatedAt: u.sede.updatedAt,
+                    },
+                  ]
+                : [],
+          })),
         })),
         metadata: {
           total,
@@ -95,6 +114,7 @@ export class AllUSerUseCase {
         schoolId,
         page,
         limit,
+        user.id,
       );
 
       const totalPages = Math.ceil(total / limit);
@@ -108,7 +128,19 @@ export class AllUSerUseCase {
           role: u.role,
           isEmailVerified: u.isEmailVerified,
           activate: u.activate,
-          schools: u.schools,
+          sedes:
+            u.sede && u.sede.id
+              ? [
+                  {
+                    id: u.sede.id,
+                    name: u.sede.name,
+                    address: u.sede.address,
+                    phone: u.sede.phone,
+                    createdAt: u.sede.createdAt,
+                    updatedAt: u.sede.updatedAt,
+                  },
+                ]
+              : [],
         })),
         metadata: {
           total,
@@ -145,24 +177,28 @@ export class AllUSerUseCase {
           createdAt: schoolData.school.createdAt,
           updatedAt: schoolData.school.updatedAt,
         },
-        users: schoolData.users.map((u) => {
-          // Encontrar las sedes específicas de este colegio para este usuario
-          const userSchool = u.schools?.find(
-            (s) => s.id === schoolData.school.id,
-          );
-          const sedes = userSchool?.sedes || [];
-
-          return {
-            id: u.id,
-            email: u.email,
-            firstName: u.firstName,
-            lastName: u.lastName,
-            role: u.role,
-            isEmailVerified: u.isEmailVerified,
-            activate: u.activate,
-            sedes: sedes,
-          };
-        }),
+        users: schoolData.users.map((u) => ({
+          id: u.id,
+          email: u.email,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          role: u.role,
+          isEmailVerified: u.isEmailVerified,
+          activate: u.activate,
+          sedes:
+            u.sede && u.sede.id
+              ? [
+                  {
+                    id: u.sede.id,
+                    name: u.sede.name,
+                    address: u.sede.address,
+                    phone: u.sede.phone,
+                    createdAt: u.sede.createdAt,
+                    updatedAt: u.sede.updatedAt,
+                  },
+                ]
+              : [],
+        })),
       })),
       metadata: {
         total,

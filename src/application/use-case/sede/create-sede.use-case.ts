@@ -43,7 +43,24 @@ export class CreateSedeUseCase {
       new Date(),
       new Date(),
     );
-    const createdSede = await this.sedeRepository.createSede(sede);
+    let createdSede: Sede;
+    try {
+      createdSede = await this.sedeRepository.createSede(sede);
+    } catch (error) {
+      const err = error as { code?: string; message?: string };
+      if (err.code === 'P2003' || err.code === 'FOREIGN_KEY_CONSTRAINT') {
+        throw new UnauthorizedException(
+          'El colegio especificado no existe o es inválido.',
+        );
+      }
+      if (
+        err.code === 'P2002' ||
+        (err.message && err.message.includes('Unique constraint failed'))
+      ) {
+        throw new UnauthorizedException('Ya existe una sede con ese nombre.');
+      }
+      throw new UnauthorizedException('No se pudo crear la sede.');
+    }
 
     return {
       name: createdSede.name,

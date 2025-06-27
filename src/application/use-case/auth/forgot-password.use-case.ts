@@ -28,7 +28,8 @@ export class ForgotPasswordUseCase {
     if (!user) {
       // Don't reveal if email exists or not for security
       return {
-        message: 'If the email exists, a password reset link has been sent.',
+        message:
+          'Si el email existe, se ha enviado un enlace para restablecer la contraseña.',
       };
     }
 
@@ -42,10 +43,20 @@ export class ForgotPasswordUseCase {
     await this.passwordResetRepository.save(passwordReset);
 
     // Send reset email
-    await this.emailService.sendPasswordResetEmail(request.email, resetToken);
+    try {
+      await this.emailService.sendPasswordResetEmail(request.email, resetToken);
+      console.log(`Email de restablecimiento enviado a: ${request.email}`);
+    } catch (error) {
+      console.error(
+        `Error enviando email de restablecimiento a ${request.email}:`,
+        error instanceof Error ? error.message : String(error),
+      );
+      // No lanzar error para no revelar si el email existe
+    }
 
     return {
-      message: 'If the email exists, a password reset link has been sent.',
+      message:
+        'Si el email existe, se ha enviado un enlace para restablecer la contraseña.',
     };
   }
 }

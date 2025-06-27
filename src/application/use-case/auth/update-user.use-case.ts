@@ -41,7 +41,8 @@ export class UpdateUserUseCase {
       lastName,
       role,
       activate,
-      schools,
+      schoolId,
+      sedeId,
     } = request;
 
     // Verificar que el usuario actual existe
@@ -59,17 +60,27 @@ export class UpdateUserUseCase {
     }
 
     // Verificar permisos
-    this.validatePermissions(
-      currentUserEntity,
-      userToUpdate,
-      role,
-      schools,
-      activate,
-    );
+    this.validatePermissions(currentUserEntity, userToUpdate, role, activate);
 
-    // Validar colegios y sedes si se van a actualizar
-    if (schools && schools.length > 0) {
-      await this.validateSchoolsAndSedes(schools);
+    // Validar colegio y sede si se van a actualizar
+    if (role !== 'SUPER') {
+      if (!schoolId) {
+        throw new BadRequestException(
+          'Se requiere el id del colegio para este rol.',
+        );
+      }
+      const schoolExists = await this.schoolRepository.findById(schoolId);
+      if (!schoolExists) {
+        throw new BadRequestException(`El colegio ${schoolId} no existe.`);
+      }
+      if (sedeId) {
+        const sede = await this.sedeRepository.findById(sedeId);
+        if (!sede || sede.schoolId !== schoolId) {
+          throw new BadRequestException(
+            `La sede ${sedeId} no pertenece al colegio ${schoolId}.`,
+          );
+        }
+      }
     }
 
     // Crear usuario actualizado
@@ -88,7 +99,11 @@ export class UpdateUserUseCase {
     );
 
     // Guardar usuario actualizado
-    const savedUser = await this.userRepository.update(updatedUser, schools);
+    const savedUser = await this.userRepository.update(
+      updatedUser,
+      schoolId,
+      sedeId,
+    );
 
     return {
       user: {
@@ -99,28 +114,34 @@ export class UpdateUserUseCase {
         role: savedUser.role,
         isEmailVerified: savedUser.isEmailVerified,
         activate: savedUser.activate,
-        schools: savedUser.schools?.map((school) => ({
-          id: school.id,
-          name: school.name,
-          address: school.address || undefined,
-          phone: school.phone || undefined,
-          imgUrl: school.imgUrl || undefined,
-          department: school.department || undefined,
-          municipality: school.municipality || undefined,
-          mail: school.mail || undefined,
-          website: school.website || undefined,
-          createdAt: school.createdAt,
-          updatedAt: school.updatedAt,
-          sedes:
-            school.sedes?.map((sede) => ({
-              id: sede.id,
-              name: sede.name,
-              address: sede.address || undefined,
-              phone: sede.phone || undefined,
-              createdAt: sede.createdAt,
-              updatedAt: sede.updatedAt,
-            })) || [],
-        })),
+        school: savedUser.school
+          ? {
+              id: savedUser.school.id,
+              name: savedUser.school.name,
+              address: savedUser.school.address,
+              phone: savedUser.school.phone,
+              imgUrl: savedUser.school.imgUrl,
+              department: savedUser.school.department,
+              municipality: savedUser.school.municipality,
+              mail: savedUser.school.mail,
+              website: savedUser.school.website,
+              createdAt: savedUser.school.createdAt,
+              updatedAt: savedUser.school.updatedAt,
+            }
+          : null,
+        sedes:
+          savedUser.sede && savedUser.sede.id
+            ? [
+                {
+                  id: savedUser.sede.id,
+                  name: savedUser.sede.name,
+                  address: savedUser.sede.address,
+                  phone: savedUser.sede.phone,
+                  createdAt: savedUser.sede.createdAt,
+                  updatedAt: savedUser.sede.updatedAt,
+                },
+              ]
+            : [],
         message: 'Usuario actualizado exitosamente',
       },
     };
@@ -130,7 +151,6 @@ export class UpdateUserUseCase {
     currentUser: User,
     userToUpdate: User,
     newRole?: string,
-    schools?: { schoolId: string; sedeIds?: string[] }[],
     activate?: boolean,
   ): void {
     // SUPER puede actualizar cualquier usuario
@@ -161,42 +181,11 @@ export class UpdateUserUseCase {
         throw new UnauthorizedException('No puedes cambiar tu rol');
       }
 
-      // USER no puede modificar colegios/sedes
-      if (schools) {
-        throw new UnauthorizedException('No puedes modificar colegios y sedes');
-      }
-
       // USER no puede cambiar su estado de activación
       if (activate !== undefined && activate !== currentUser.activate) {
         throw new UnauthorizedException(
           'No puedes cambiar tu estado de activación',
         );
-      }
-    }
-  }
-
-  private async validateSchoolsAndSedes(
-    schools: { schoolId: string; sedeIds?: string[] }[],
-  ): Promise<void> {
-    for (const school of schools) {
-      const schoolExists = await this.schoolRepository.findById(
-        school.schoolId,
-      );
-      if (!schoolExists) {
-        throw new BadRequestException(
-          `El colegio ${school.schoolId} no existe.`,
-        );
-      }
-
-      if (school.sedeIds && school.sedeIds.length > 0) {
-        for (const sedeId of school.sedeIds) {
-          const sede = await this.sedeRepository.findById(sedeId);
-          if (!sede || sede.schoolId !== school.schoolId) {
-            throw new BadRequestException(
-              `La sede ${sedeId} no pertenece al colegio ${school.schoolId}.`,
-            );
-          }
-        }
       }
     }
   }

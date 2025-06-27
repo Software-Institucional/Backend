@@ -1,9 +1,10 @@
 import { Role } from '@prisma/client';
 import * as crypto from 'crypto';
-import { SchoolEntity } from 'src/domain/interfaces/school.interface';
+import { SchoolDto, SedeDto } from 'src/application/dtos/user.dtos';
 
 export class User {
-  public schools?: SchoolEntity[];
+  public school?: SchoolDto;
+  public sede?: SedeDto;
 
   constructor(
     public readonly id: string,

@@ -19,5 +19,5 @@ export interface SchoolEntity {
   website?: string;
   createdAt: Date;
   updatedAt: Date;
-  sedes: SedeEntity[];
+  sedes: SedeEntity;
 }

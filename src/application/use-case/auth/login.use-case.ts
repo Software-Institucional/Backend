@@ -53,7 +53,7 @@ export class LoginUseCase {
     }
 
     if (user.role !== 'SUPER' && request.schoolId) {
-      if (!user.schools?.some((s) => s.id === request.schoolId)) {
+      if (user.school?.id !== request.schoolId) {
         throw new BadRequestException(
           'No tienes acceso a esta Escuela. Verifica la Institución.',
         );

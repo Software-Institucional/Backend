@@ -19,14 +19,8 @@ export interface SchoolData {
 export interface UserRepository {
   findById(id: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
-  save(
-    user: User,
-    schools?: { schoolId: string; sedeIds?: string[] }[],
-  ): Promise<User>;
-  update(
-    user: User,
-    schools?: { schoolId: string; sedeIds?: string[] }[],
-  ): Promise<User>;
+  save(user: User, schoolId?: string, sedeId?: string): Promise<User>;
+  update(user: User, schoolId?: string, sedeId?: string): Promise<User>;
   delete(id: string): Promise<void>;
   allUser(id: string): Promise<User[]>;
   searchUsersWithFilters(
@@ -35,6 +29,7 @@ export interface UserRepository {
     schoolId?: string,
     page?: number,
     limit?: number,
+    createdById?: string,
   ): Promise<{ users: User[]; total: number }>;
   getAllUsersBySchool(
     search?: string,

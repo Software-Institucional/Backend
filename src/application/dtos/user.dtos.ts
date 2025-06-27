@@ -77,17 +77,10 @@ export class RegisterRequestDto {
   role: Role;
   @ApiProperty({ example: 'Pérez' })
   lastName: string;
-  @ApiProperty({
-    example: [
-      { schoolId: 'uuid-colegio-1', sedeIds: ['uuid-sede-1', 'uuid-sede-2'] },
-      { schoolId: 'uuid-colegio-2', sedeIds: ['uuid-sede-3'] },
-      { schoolId: 'uuid-colegio-3' },
-    ],
-    required: false,
-    description:
-      'Lista de colegios y sedes (opcional) a los que el usuario tendrá acceso',
-  })
-  schools?: { schoolId: string; sedeIds?: string[] }[];
+  @ApiProperty()
+  schoolId?: string;
+  @ApiProperty()
+  sedeId?: string;
   @ApiProperty({
     example: 'uuid-creador',
     required: false,
@@ -97,26 +90,15 @@ export class RegisterRequestDto {
 }
 
 export class RegisterResponseDto {
-  @ApiProperty({
-    example: {
-      id: 'uuid',
-      email: 'usuario@email.com',
-      firstName: 'Juan',
-      lastName: 'Pérez',
-      role: 'ADMIN',
-      schoolId: ['uuid-colegio'],
-      message:
-        'Usuario registrado exitosamente. Por favor revisa tu correo para la verificación.',
-      createdById: 'uuid-creador',
-    },
-  })
+  @ApiProperty()
   user: {
     id: string;
     email: string;
     firstName: string;
     lastName: string;
     role?: Role;
-    schoolId?: string;
+    school?: SchoolDto;
+    sede?: SedeDto;
     message: string;
     createdById?: string;
   };
@@ -132,33 +114,31 @@ export class ResetPasswordRequestDto {
 export class ResetPasswordResponseDto {
   @ApiProperty({
     example:
-      'Password has been reset successfully. Please log in with your new password.',
+      'La contraseña ha sido restablecida exitosamente. Por favor inicia sesión con tu nueva contraseña.',
   })
   message: string;
 }
 
 export class SchoolDto {
-  @ApiProperty()
   id: string;
-  @ApiProperty()
   name: string;
-  @ApiProperty({ required: false })
   address?: string;
-  @ApiProperty({ required: false })
   phone?: string;
-  @ApiProperty({ required: false })
   imgUrl?: string;
-  @ApiProperty({ required: false })
   department?: string;
-  @ApiProperty({ required: false })
   municipality?: string;
-  @ApiProperty({ required: false })
   mail?: string;
-  @ApiProperty({ required: false })
   website?: string;
-  @ApiProperty()
   createdAt: Date;
-  @ApiProperty()
+  updatedAt: Date;
+}
+
+export class SedeDto {
+  id: string;
+  name: string;
+  address?: string;
+  phone?: string;
+  createdAt: Date;
   updatedAt: Date;
 }
 
@@ -191,29 +171,27 @@ export class AllUserResponseDto {
         role: 'DOCENTE',
         isEmailVerified: true,
         activate: true,
-        schools: [
+        school: {
+          id: 'uuid-school',
+          name: 'Colegio A',
+          address: 'Calle 123',
+          phone: '123456',
+          imgUrl: 'https://example.com/image.jpg',
+          department: 'Antioquia',
+          municipality: 'Medellín',
+          mail: 'colegio@mail.com',
+          website: 'www.colegio.com',
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+        },
+        sedes: [
           {
-            id: 'uuid-school',
-            name: 'Colegio A',
+            id: 'sede-1',
+            name: 'Sede Principal',
             address: 'Calle 123',
-            phone: '123456',
-            imgUrl: 'https://example.com/image.jpg',
-            department: 'Antioquia',
-            municipality: 'Medellín',
-            mail: 'colegio@mail.com',
-            website: 'www.colegio.com',
+            phone: '+57 300 123 4567',
             createdAt: '2024-01-01T00:00:00.000Z',
             updatedAt: '2024-01-01T00:00:00.000Z',
-            sedes: [
-              {
-                id: 'sede-1',
-                name: 'Sede Principal',
-                address: 'Calle 123',
-                phone: '+57 300 123 4567',
-                createdAt: '2024-01-01T00:00:00.000Z',
-                updatedAt: '2024-01-01T00:00:00.000Z',
-              },
-            ],
           },
         ],
       },
@@ -227,16 +205,8 @@ export class AllUserResponseDto {
     role: Role;
     isEmailVerified: boolean;
     activate: boolean;
-    schools?: (SchoolDto & {
-      sedes: {
-        id: string;
-        name: string;
-        address?: string;
-        phone?: string;
-        createdAt: Date;
-        updatedAt: Date;
-      }[];
-    })[];
+    school?: SchoolDto | null;
+    sedes: SedeDto[];
   }[];
 
   @ApiProperty({
@@ -312,14 +282,7 @@ export class AllUsersBySchoolResponseDto {
       role: Role;
       isEmailVerified: boolean;
       activate: boolean;
-      sedes: {
-        id: string;
-        name: string;
-        address?: string;
-        phone?: string;
-        createdAt: Date;
-        updatedAt: Date;
-      }[];
+      sedes: SedeDto[];
     }[];
   }[];
 
@@ -368,6 +331,10 @@ export class UpdateUserRequestDto {
       'Lista de colegios y sedes (solo ADMIN y SUPER pueden modificar)',
   })
   schools?: { schoolId: string; sedeIds?: string[] }[];
+  @ApiProperty({ example: 'uuid-school', required: false })
+  schoolId?: string;
+  @ApiProperty({ example: 'uuid-sede', required: false })
+  sedeId?: string;
 }
 
 export class UpdateUserResponseDto {
@@ -380,29 +347,27 @@ export class UpdateUserResponseDto {
       role: 'ADMIN',
       isEmailVerified: true,
       activate: true,
-      schools: [
+      school: {
+        id: 'uuid-school',
+        name: 'Colegio A',
+        address: 'Calle 123',
+        phone: '123456',
+        imgUrl: 'https://example.com/image.jpg',
+        department: 'Antioquia',
+        municipality: 'Medellín',
+        mail: 'colegio@mail.com',
+        website: 'www.colegio.com',
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+      },
+      sedes: [
         {
-          id: 'uuid-school',
-          name: 'Colegio A',
+          id: 'sede-1',
+          name: 'Sede Principal',
           address: 'Calle 123',
-          phone: '123456',
-          imgUrl: 'https://example.com/image.jpg',
-          department: 'Antioquia',
-          municipality: 'Medellín',
-          mail: 'colegio@mail.com',
-          website: 'www.colegio.com',
+          phone: '+57 300 123 4567',
           createdAt: '2024-01-01T00:00:00.000Z',
           updatedAt: '2024-01-01T00:00:00.000Z',
-          sedes: [
-            {
-              id: 'sede-1',
-              name: 'Sede Principal',
-              address: 'Calle 123',
-              phone: '+57 300 123 4567',
-              createdAt: '2024-01-01T00:00:00.000Z',
-              updatedAt: '2024-01-01T00:00:00.000Z',
-            },
-          ],
         },
       ],
       message: 'Usuario actualizado exitosamente',
@@ -416,16 +381,8 @@ export class UpdateUserResponseDto {
     role: Role;
     isEmailVerified: boolean;
     activate: boolean;
-    schools?: (SchoolDto & {
-      sedes: {
-        id: string;
-        name: string;
-        address?: string;
-        phone?: string;
-        createdAt: Date;
-        updatedAt: Date;
-      }[];
-    })[];
+    school?: SchoolDto | null;
+    sedes: SedeDto[];
     message: string;
   };
 }

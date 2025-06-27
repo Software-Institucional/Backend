@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { ForgotPasswordUseCase } from 'src/application/use-case/auth/forgot-password.use-case';
 import { LoginUseCase } from 'src/application/use-case/auth/login.use-case';
@@ -25,9 +25,7 @@ import { UpdateUserUseCase } from 'src/application/use-case/auth/update-user.use
 
 @Module({
   imports: [
-    ConfigModule,
     JwtModule.registerAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_ACCESS_SECRET'),

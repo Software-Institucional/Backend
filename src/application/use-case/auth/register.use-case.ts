@@ -13,6 +13,10 @@ import { UserRepository } from 'src/domain/repositories/auth/user.repository';
 import { SchoolRepository } from 'src/domain/repositories/school/scholl.repository';
 import { SedeRepository } from 'src/domain/repositories/sede/sede.repository';
 import { PasswordService } from 'src/domain/services/password.service';
+import { EmailService } from 'src/domain/services/email.service';
+import { PasswordResetRepository } from 'src/domain/repositories/auth/password-reset.repository';
+import { Role } from '@prisma/client';
+import { PasswordReset } from 'src/domain/entities/auth/password-reset.entity';
 
 @Injectable()
 export class RegisterUseCase {
@@ -25,16 +29,30 @@ export class RegisterUseCase {
     private readonly passwordService: PasswordService,
     @Inject('SchoolRepository')
     private readonly schoolRepository: SchoolRepository,
+    @Inject('EmailService')
+    private readonly emailService: EmailService,
+    @Inject('PasswordResetRepository')
+    private readonly passwordResetRepository: PasswordResetRepository,
   ) {}
 
   async execute(request: RegisterRequestDto): Promise<RegisterResponseDto> {
-    const { email, role, firstName, lastName, schools, createdById } = request;
+    const { email, role, firstName, lastName, schoolId, sedeId, createdById } =
+      request;
+
+    // Validar rol
+    if (!this.isValidRole(role)) {
+      throw new BadRequestException(
+        `Rol inválido. Los roles válidos son: ${Object.values(Role).join(', ')}`,
+      );
+    }
 
     // Validar usuario existente
     const existingUser = await this.userRepository.findByEmail(email);
     if (existingUser) {
       throw new ConflictException('El correo electrónico ya está en uso');
     }
+
+    // Validar usuario creador
     if (createdById) {
       const creator = await this.userRepository.findById(createdById);
       if (!creator) {
@@ -42,36 +60,29 @@ export class RegisterUseCase {
       }
     }
 
-    // Validar colegios y sedes
-    if (schools && schools.length > 0) {
-      for (const school of schools) {
-        const schoolExists = await this.schoolRepository.findById(
-          school.schoolId,
+    // Validar colegio y sede si el rol no es SUPER
+    if (role !== 'SUPER') {
+      if (!schoolId) {
+        throw new BadRequestException(
+          'Se requiere el id del colegio para este rol.',
         );
-        if (!schoolExists) {
-          throw new BadRequestException(
-            `El colegio ${school.schoolId} no existe.`,
-          );
-        }
-        if (school.sedeIds && school.sedeIds.length > 0) {
-          for (const sedeId of school.sedeIds) {
-            const sede = await this.sedeRepository.findById(sedeId);
-            if (!sede || sede.school?.id !== school.schoolId) {
-              throw new BadRequestException(
-                `La sede ${sedeId} no pertenece al colegio ${school.schoolId}.`,
-              );
-            }
-          }
-        }
       }
-    } else if (role !== 'SUPER') {
-      throw new BadRequestException(
-        'Se requiere al menos un colegio para este rol.',
-      );
+
+      // Validar existencia de colegio y sede
+      const schoolExists = await this.schoolRepository.findById(schoolId);
+      if (!schoolExists) {
+        throw new BadRequestException(`El colegio ${schoolId} no existe.`);
+      }
+      const sede = await this.sedeRepository.findById(sedeId!);
+      if (!sede || sede.school?.id !== schoolId) {
+        throw new BadRequestException(
+          `La sede ${sedeId} no pertenece al colegio ${schoolId}.`,
+        );
+      }
     }
 
-    // Crear usuario
-    const tempPassword = Math.random().toString(36).slice(-8);
+    // Crear usuario con contraseña temporal
+    const tempPassword = this.generateTempPassword();
     const hashedPassword = await this.passwordService.hash(tempPassword);
     const user = User.create(
       email,
@@ -82,23 +93,74 @@ export class RegisterUseCase {
       createdById,
     );
 
-    // Guardar usuario y relaciones
-    const savedUser = await this.userRepository.save(user, schools);
+    // Generar token para establecer contraseña
+    const setupToken = this.passwordService.generateResetToken();
+    const passwordReset = PasswordReset.create(email, setupToken);
 
-    // TODO: Send verification email with temp password
-    console.log(`Temp password for ${email}: ${tempPassword}`);
+    try {
+      // Guardar usuario
+      const savedUser = await this.userRepository.save(user, schoolId, sedeId);
 
-    return {
-      user: {
-        id: savedUser.id,
-        email: savedUser.email,
-        firstName: savedUser.firstName,
-        lastName: savedUser.lastName,
-        role: savedUser.role,
-        createdById: savedUser.createdById,
-        message:
-          'Usuario registrado exitosamente. Por favor revisa tu correo para la verificación.',
-      },
-    };
+      // Guardar token de reset
+      await this.passwordResetRepository.save(passwordReset);
+
+      // Enviar email de bienvenida con token
+      await this.sendWelcomeEmail(email, firstName, setupToken);
+
+      return {
+        user: {
+          id: savedUser.id,
+          email: savedUser.email,
+          firstName: savedUser.firstName,
+          lastName: savedUser.lastName,
+          role: savedUser.role,
+          createdById: savedUser.createdById,
+          message:
+            'Usuario registrado exitosamente. Por favor revisa tu correo para establecer tu contraseña.',
+        },
+      };
+    } catch {
+      // Si falla el envío del email, eliminar el usuario creado
+      try {
+        await this.userRepository.delete(user.id);
+        // Buscar y eliminar el token de reset si existe
+        const passwordResets =
+          await this.passwordResetRepository.findByEmail(email);
+        for (const reset of passwordResets) {
+          await this.passwordResetRepository.delete(reset.id);
+        }
+      } catch (deleteError) {
+        console.error(
+          'Error eliminando usuario después de fallo en email:',
+          deleteError,
+        );
+      }
+      throw new BadRequestException(
+        'Error enviando email de bienvenida. El usuario no fue creado. Por favor intenta nuevamente.',
+      );
+    }
+  }
+
+  private isValidRole(role: string): role is Role {
+    return Object.values(Role).includes(role as Role);
+  }
+
+  private generateTempPassword(): string {
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 8; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
+  private async sendWelcomeEmail(
+    email: string,
+    firstName: string,
+    token: string,
+  ): Promise<void> {
+    await this.emailService.sendEmailVerification(email, firstName, token);
+    console.log(`Email de bienvenida enviado a: ${email}`);
   }
 }
