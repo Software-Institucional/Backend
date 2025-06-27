@@ -20,6 +20,7 @@ import { SchoolModule } from './school.module';
 import { AllUSerUseCase } from 'src/application/use-case/auth/all-user-register.use-case';
 import { PrismaSedeRepository } from 'src/infrastructure/repositories/sede/prisma-sede.repository';
 import { UpdateUserUseCase } from 'src/application/use-case/auth/update-user.use-case';
+import { PrismaSchoolRepository } from 'src/infrastructure/repositories/school/prisma-school.repository';
 
 // Use Cases
 
@@ -72,6 +73,10 @@ import { UpdateUserUseCase } from 'src/application/use-case/auth/update-user.use
     {
       provide: 'SedeRepository',
       useClass: PrismaSedeRepository,
+    },
+    {
+      provide: 'SchoolRepository',
+      useClass: PrismaSchoolRepository,
     },
   ],
   exports: [NestJsJwtService, JwtAuthGuard],

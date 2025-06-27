@@ -72,6 +72,18 @@ export class RegisterUseCase {
       if (!schoolExists) {
         throw new BadRequestException(`El colegio ${schoolId} no existe.`);
       }
+      // Si se envía sedeId, validar que exista y pertenezca al colegio
+      if (sedeId) {
+        const sede = await this.sedeRepository.findById(sedeId);
+        if (!sede) {
+          throw new BadRequestException('La sede proporcionada no existe.');
+        }
+        if (sede.schoolId !== schoolId) {
+          throw new BadRequestException(
+            `La sede ${sedeId} no pertenece al colegio ${schoolId}.`,
+          );
+        }
+      }
     } else if (role === 'DOCENTE') {
       if (!schoolId) {
         throw new BadRequestException(
@@ -134,7 +146,7 @@ export class RegisterUseCase {
             'Usuario registrado exitosamente. Por favor revisa tu correo para establecer tu contraseña.',
         },
       };
-    } catch {
+    } catch (error: any) {
       // Si falla el envío del email, eliminar el usuario creado
       try {
         await this.userRepository.delete(user.id);
@@ -148,6 +160,19 @@ export class RegisterUseCase {
         console.error(
           'Error eliminando usuario después de fallo en email:',
           deleteError,
+        );
+      }
+      // Si el error tiene un mensaje específico de email inválido, mostrarlo
+      const errorMsg = (error as { message?: string }).message;
+      if (
+        error &&
+        typeof error === 'object' &&
+        'message' in error &&
+        typeof errorMsg === 'string' &&
+        (errorMsg.includes('email is not valid') || errorMsg.includes('email'))
+      ) {
+        throw new BadRequestException(
+          'El correo electrónico proporcionado no es válido.',
         );
       }
       throw new BadRequestException(

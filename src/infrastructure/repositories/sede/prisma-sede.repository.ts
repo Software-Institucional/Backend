@@ -38,9 +38,9 @@ export class PrismaSedeRepository implements SedeRepository {
       ? new Sede(
           found.id,
           found.name,
+          found.schoolId,
           found.address!,
           found.phone!,
-          found.schoolId,
           found.createdAt,
           found.updatedAt,
           found.school,
