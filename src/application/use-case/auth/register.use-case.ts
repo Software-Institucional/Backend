@@ -60,20 +60,35 @@ export class RegisterUseCase {
       }
     }
 
-    // Validar colegio y sede si el rol no es SUPER
-    if (role !== 'SUPER') {
+    // Validar colegio y sede según el rol
+    if (role === 'ADMIN') {
       if (!schoolId) {
         throw new BadRequestException(
           'Se requiere el id del colegio para este rol.',
         );
       }
-
+      // Validar existencia del colegio
+      const schoolExists = await this.schoolRepository.findById(schoolId);
+      if (!schoolExists) {
+        throw new BadRequestException(`El colegio ${schoolId} no existe.`);
+      }
+    } else if (role === 'DOCENTE') {
+      if (!schoolId) {
+        throw new BadRequestException(
+          'Se requiere el id del colegio para este rol.',
+        );
+      }
+      if (!sedeId) {
+        throw new BadRequestException(
+          'Se requiere el id de la sede para este rol.',
+        );
+      }
       // Validar existencia de colegio y sede
       const schoolExists = await this.schoolRepository.findById(schoolId);
       if (!schoolExists) {
         throw new BadRequestException(`El colegio ${schoolId} no existe.`);
       }
-      const sede = await this.sedeRepository.findById(sedeId!);
+      const sede = await this.sedeRepository.findById(sedeId);
       if (!sede || sede.school?.id !== schoolId) {
         throw new BadRequestException(
           `La sede ${sedeId} no pertenece al colegio ${schoolId}.`,
