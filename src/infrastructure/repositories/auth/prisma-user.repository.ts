@@ -287,15 +287,12 @@ export class PrismaUserRepository implements UserRepository {
         { email: { contains: search, mode: 'insensitive' as const } },
       ];
     }
-
     if (role) {
       whereCondition.role = role;
     }
-
     if (schoolId) {
       whereCondition.schoolId = schoolId;
     }
-
     if (createdById) {
       whereCondition.createdById = createdById;
     }

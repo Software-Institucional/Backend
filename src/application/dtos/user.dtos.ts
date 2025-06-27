@@ -207,6 +207,10 @@ export class AllUserResponseDto {
       page: 1,
       limit: 10,
       totalPages: 5,
+      totalUsers: 50,
+      docentes: 30,
+      activos: 40,
+      cantidadSedes: 8,
     },
   })
   metadata: {
@@ -214,6 +218,10 @@ export class AllUserResponseDto {
     page: number;
     limit: number;
     totalPages: number;
+    totalUsers: number;
+    docentes: number;
+    activos: number;
+    cantidadSedes: number;
   };
 }
 
@@ -252,22 +260,16 @@ export class AllUsersBySchoolResponseDto {
       },
     ],
   })
-  schools: {
-    school: SchoolDto & {
-      activate: boolean;
-    };
-    users: {
-      id: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-      role: Role;
-      isEmailVerified: boolean;
-      activate: boolean;
-      sedes: SedeDto | null;
-    }[];
+  users: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: Role;
+    isEmailVerified: boolean;
+    activate: boolean;
+    sedes: SedeDto | null;
   }[];
-
   @ApiProperty({
     description: 'Metadatos de paginación',
     example: {
@@ -302,16 +304,7 @@ export class UpdateUserRequestDto {
   role?: Role;
   @ApiProperty({ example: true, required: false })
   activate?: boolean;
-  @ApiProperty({
-    example: [
-      { schoolId: 'uuid-colegio-1', sedeIds: ['uuid-sede-1', 'uuid-sede-2'] },
-      { schoolId: 'uuid-colegio-2', sedeIds: ['uuid-sede-3'] },
-      { schoolId: 'uuid-colegio-3' },
-    ],
-    required: false,
-    description:
-      'Lista de colegios y sedes (solo ADMIN y SUPER pueden modificar)',
-  })
+  @ApiProperty()
   schools?: { schoolId: string; sedeIds?: string[] }[];
   @ApiProperty({ example: 'uuid-school', required: false })
   schoolId?: string;
