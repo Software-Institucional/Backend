@@ -1,4 +1,9 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import {
   AllUserRequestDto,
   AllUserResponseDto,
@@ -37,6 +42,11 @@ export class AllUSerUseCase {
     const page = request.page ? parseInt(request.page.toString(), 10) : 1;
     const limit = request.limit ? parseInt(request.limit.toString(), 10) : 10;
     const { search, role, schoolId } = request;
+
+    // Validar que schoolId esté presente
+    if (!schoolId) {
+      throw new BadRequestException('El parámetro schoolId es obligatorio.');
+    }
 
     // Lógica de visibilidad y búsqueda
     let createdById: string | undefined = undefined;
