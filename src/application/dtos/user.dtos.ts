@@ -184,16 +184,7 @@ export class AllUserResponseDto {
           createdAt: '2024-01-01T00:00:00.000Z',
           updatedAt: '2024-01-01T00:00:00.000Z',
         },
-        sedes: [
-          {
-            id: 'sede-1',
-            name: 'Sede Principal',
-            address: 'Calle 123',
-            phone: '+57 300 123 4567',
-            createdAt: '2024-01-01T00:00:00.000Z',
-            updatedAt: '2024-01-01T00:00:00.000Z',
-          },
-        ],
+        sedes: null,
       },
     ],
   })
@@ -206,7 +197,7 @@ export class AllUserResponseDto {
     isEmailVerified: boolean;
     activate: boolean;
     school?: SchoolDto | null;
-    sedes: SedeDto[];
+    sedes: SedeDto | null;
   }[];
 
   @ApiProperty({
@@ -255,16 +246,7 @@ export class AllUsersBySchoolResponseDto {
             role: 'DOCENTE',
             isEmailVerified: false,
             activate: true,
-            sedes: [
-              {
-                id: '6e1c4c12-449a-401f-8a46-8ef0dde67df8',
-                name: 'Sede Principal',
-                address: 'Calle 123 #45-67, Bogotá',
-                phone: '+57 300 123 4567',
-                createdAt: '2025-06-24T16:43:06.003Z',
-                updatedAt: '2025-06-24T16:43:06.003Z',
-              },
-            ],
+            sedes: null,
           },
         ],
       },
@@ -282,7 +264,7 @@ export class AllUsersBySchoolResponseDto {
       role: Role;
       isEmailVerified: boolean;
       activate: boolean;
-      sedes: SedeDto[];
+      sedes: SedeDto | null;
     }[];
   }[];
 
@@ -360,16 +342,7 @@ export class UpdateUserResponseDto {
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
       },
-      sedes: [
-        {
-          id: 'sede-1',
-          name: 'Sede Principal',
-          address: 'Calle 123',
-          phone: '+57 300 123 4567',
-          createdAt: '2024-01-01T00:00:00.000Z',
-          updatedAt: '2024-01-01T00:00:00.000Z',
-        },
-      ],
+      sedes: null,
       message: 'Usuario actualizado exitosamente',
     },
   })
@@ -382,7 +355,7 @@ export class UpdateUserResponseDto {
     isEmailVerified: boolean;
     activate: boolean;
     school?: SchoolDto | null;
-    sedes: SedeDto[];
+    sedes: SedeDto | null;
     message: string;
   };
 }

@@ -56,9 +56,9 @@ export class BrevoEmailService implements EmailService {
         <html lang="es">
         <head>
             <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Restablecer Contraseña - Acadix</title>
-            <style>
+          <style>
                 * {
                     margin: 0;
                     padding: 0;
@@ -331,7 +331,7 @@ export class BrevoEmailService implements EmailService {
                         height: 40px;
                     }
                 }
-            </style>
+          </style>
         </head>
         <body>
             <div class="email-wrapper">
@@ -374,7 +374,7 @@ export class BrevoEmailService implements EmailService {
                                 Si tienes problemas con el botón, copia y pega el siguiente enlace en tu navegador:
                             </p>
                             <a href="${resetUrl}" class="url-box">${resetUrl}</a>
-                        </div>
+            </div>
 
                         <div class="support-section">
                             <p class="support-text">
@@ -391,7 +391,7 @@ export class BrevoEmailService implements EmailService {
                                 <p>Saludos cordiales,<br>
                                 <span class="signature-name">El equipo de Acadix</span></p>
                             </div>
-                        </div>
+              </div>
                     </main>
 
                     <footer class="email-footer">
@@ -400,8 +400,8 @@ export class BrevoEmailService implements EmailService {
                             © 2024 Acadix. Todos los derechos reservados.
                         </p>
                     </footer>
-                </div>
             </div>
+          </div>
         </body>
         </html>
       `,

@@ -131,17 +131,15 @@ export class UpdateUserUseCase {
           : null,
         sedes:
           savedUser.sede && savedUser.sede.id
-            ? [
-                {
-                  id: savedUser.sede.id,
-                  name: savedUser.sede.name,
-                  address: savedUser.sede.address,
-                  phone: savedUser.sede.phone,
-                  createdAt: savedUser.sede.createdAt,
-                  updatedAt: savedUser.sede.updatedAt,
-                },
-              ]
-            : [],
+            ? {
+                id: savedUser.sede.id,
+                name: savedUser.sede.name,
+                address: savedUser.sede.address,
+                phone: savedUser.sede.phone,
+                createdAt: savedUser.sede.createdAt,
+                updatedAt: savedUser.sede.updatedAt,
+              }
+            : null,
         message: 'Usuario actualizado exitosamente',
       },
     };

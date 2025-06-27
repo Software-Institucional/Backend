@@ -27,6 +27,12 @@ export class AllUSerUseCase {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
+    if (user.role !== 'ADMIN' && user.role !== 'SUPER') {
+      throw new UnauthorizedException(
+        'No tienes permiso para acceder a este recurso.',
+      );
+    }
+
     // Convertir page y limit a números
     const page = parseInt(request.page?.toString() || '1', 10);
     const limit = parseInt(request.limit?.toString() || '10', 10);
@@ -43,61 +49,89 @@ export class AllUSerUseCase {
 
       const totalPages = Math.ceil(total / limit);
 
+      // Calcular los totales globales
+      const allUsers = schools.flatMap((schoolData) => schoolData.users);
+      const totalUsers = allUsers.length;
+      const docentes = allUsers.filter((u) => u.role === 'DOCENTE').length;
+      const activos = allUsers.filter((u) => u.activate).length;
+
       return {
-        schools: schools.map((schoolData) => ({
-          school: {
-            id: schoolData.school.id,
-            name: schoolData.school.name,
-            address: schoolData.school.address,
-            phone: schoolData.school.phone,
-            imgUrl: schoolData.school.imgUrl,
-            department: schoolData.school.department,
-            municipality: schoolData.school.municipality,
-            mail: schoolData.school.mail,
-            website: schoolData.school.website,
-            activate: schoolData.school.activate,
-            createdAt: schoolData.school.createdAt,
-            updatedAt: schoolData.school.updatedAt,
-          },
-          users: schoolData.users.map((u) => ({
-            id: u.id,
-            email: u.email,
-            firstName: u.firstName,
-            lastName: u.lastName,
-            role: u.role,
-            isEmailVerified: u.isEmailVerified,
-            activate: u.activate,
-            school: u.school
-              ? {
-                  id: u.school.id,
-                  name: u.school.name,
-                  address: u.school.address,
-                  phone: u.school.phone,
-                  imgUrl: u.school.imgUrl,
-                  department: u.school.department,
-                  municipality: u.school.municipality,
-                  mail: u.school.mail,
-                  website: u.school.website,
-                  createdAt: u.school.createdAt,
-                  updatedAt: u.school.updatedAt,
-                }
-              : null,
-            sedes:
-              u.sede && u.sede.id
-                ? [
-                    {
+        schools: schools.map((schoolData) => {
+          const totalUsers = schoolData.users.length;
+          const docentes = schoolData.users.filter(
+            (u) => u.role === 'DOCENTE',
+          ).length;
+          const activos = schoolData.users.filter((u) => u.activate).length;
+          // Cantidad de sedes: contar sedes únicas por colegio
+          const sedeIds = new Set(
+            schoolData.users.flatMap((u) =>
+              u.sede && u.sede.id ? [u.sede.id] : [],
+            ),
+          );
+          const cantidadSedes = sedeIds.size;
+
+          return {
+            school: {
+              id: schoolData.school.id,
+              name: schoolData.school.name,
+              address: schoolData.school.address,
+              phone: schoolData.school.phone,
+              imgUrl: schoolData.school.imgUrl,
+              department: schoolData.school.department,
+              municipality: schoolData.school.municipality,
+              mail: schoolData.school.mail,
+              website: schoolData.school.website,
+              activate: schoolData.school.activate,
+              createdAt: schoolData.school.createdAt,
+              updatedAt: schoolData.school.updatedAt,
+            },
+            users: schoolData.users.map((u) => ({
+              id: u.id,
+              email: u.email,
+              firstName: u.firstName,
+              lastName: u.lastName,
+              role: u.role,
+              isEmailVerified: u.isEmailVerified,
+              activate: u.activate,
+              school: u.school
+                ? {
+                    id: u.school.id,
+                    name: u.school.name,
+                    address: u.school.address,
+                    phone: u.school.phone,
+                    imgUrl: u.school.imgUrl,
+                    department: u.school.department,
+                    municipality: u.school.municipality,
+                    mail: u.school.mail,
+                    website: u.school.website,
+                    createdAt: u.school.createdAt,
+                    updatedAt: u.school.updatedAt,
+                  }
+                : null,
+              sedes:
+                u.sede && u.sede.id
+                  ? {
                       id: u.sede.id,
                       name: u.sede.name,
                       address: u.sede.address,
                       phone: u.sede.phone,
                       createdAt: u.sede.createdAt,
                       updatedAt: u.sede.updatedAt,
-                    },
-                  ]
-                : [],
-          })),
-        })),
+                    }
+                  : null,
+            })),
+            metadata: {
+              totalUsers,
+              docentes,
+              activos,
+              cantidadSedes,
+            },
+          };
+        }),
         metadata: {
+          totalUsers,
+          docentes,
+          activos,
           total,
           page,
           limit,
@@ -118,6 +152,9 @@ export class AllUSerUseCase {
       );
 
       const totalPages = Math.ceil(total / limit);
+      const totalUsers = users.length;
+      const docentes = users.filter((u) => u.role === 'DOCENTE').length;
+      const activos = users.filter((u) => u.activate).length;
 
       return {
         users: users.map((u) => ({
@@ -130,19 +167,20 @@ export class AllUSerUseCase {
           activate: u.activate,
           sedes:
             u.sede && u.sede.id
-              ? [
-                  {
-                    id: u.sede.id,
-                    name: u.sede.name,
-                    address: u.sede.address,
-                    phone: u.sede.phone,
-                    createdAt: u.sede.createdAt,
-                    updatedAt: u.sede.updatedAt,
-                  },
-                ]
-              : [],
+              ? {
+                  id: u.sede.id,
+                  name: u.sede.name,
+                  address: u.sede.address,
+                  phone: u.sede.phone,
+                  createdAt: u.sede.createdAt,
+                  updatedAt: u.sede.updatedAt,
+                }
+              : null,
         })),
         metadata: {
+          totalUsers,
+          docentes,
+          activos,
           total,
           page,
           limit,
@@ -187,17 +225,15 @@ export class AllUSerUseCase {
           activate: u.activate,
           sedes:
             u.sede && u.sede.id
-              ? [
-                  {
-                    id: u.sede.id,
-                    name: u.sede.name,
-                    address: u.sede.address,
-                    phone: u.sede.phone,
-                    createdAt: u.sede.createdAt,
-                    updatedAt: u.sede.updatedAt,
-                  },
-                ]
-              : [],
+              ? {
+                  id: u.sede.id,
+                  name: u.sede.name,
+                  address: u.sede.address,
+                  phone: u.sede.phone,
+                  createdAt: u.sede.createdAt,
+                  updatedAt: u.sede.updatedAt,
+                }
+              : null,
         })),
       })),
       metadata: {
