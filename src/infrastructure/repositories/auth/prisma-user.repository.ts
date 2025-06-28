@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UserRepository } from 'src/domain/repositories/auth/user.repository';
 import { User } from 'src/domain/entities/auth/user.entity';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
-import { Role } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
 
 @Injectable()
 export class PrismaUserRepository implements UserRepository {
@@ -274,148 +274,83 @@ export class PrismaUserRepository implements UserRepository {
     search?: string,
     role?: Role,
     schoolId?: string,
-    page?: number,
-    limit?: number,
+    page = 1,
+    limit = 10,
     createdById?: string,
     activate?: boolean,
     isEmailVerified?: boolean,
   ): Promise<{ users: User[]; total: number }> {
-    const whereCondition: Record<string, any> = {};
+    const filters: Prisma.UserWhereInput = {};
 
     if (search) {
-      whereCondition.OR = [
-        { firstName: { contains: search, mode: 'insensitive' as const } },
-        { lastName: { contains: search, mode: 'insensitive' as const } },
-        { email: { contains: search, mode: 'insensitive' as const } },
+      filters.OR = [
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
       ];
     }
-    if (role) {
-      whereCondition.role = role;
-    }
-    if (schoolId) {
-      whereCondition.schoolId = schoolId;
-    }
-    if (createdById) {
-      whereCondition.createdById = createdById;
-    }
-    if (activate !== undefined) {
-      whereCondition.activate = activate;
-    }
-    if (isEmailVerified !== undefined) {
-      whereCondition.isEmailVerified = isEmailVerified;
-    }
+
+    if (role) filters.role = role;
+    if (schoolId) filters.schoolId = schoolId;
+    if (createdById) filters.createdById = createdById;
+    if (activate !== undefined) filters.activate = activate;
+    if (isEmailVerified !== undefined)
+      filters.isEmailVerified = isEmailVerified;
 
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
-        where: whereCondition,
+        where: filters,
         include: {
           school: true,
           sede: true,
         },
-        skip: (page! - 1) * limit!,
+        skip: (page - 1) * limit,
         take: limit,
       }),
       this.prisma.user.count({
-        where: whereCondition,
+        where: filters,
       }),
     ]);
 
-    return {
-      users: users.map((user) => {
-        const userEntity = new User(
-          user.id,
-          user.email,
-          user.password,
-          user.firstName,
-          user.lastName,
-          user.role,
-          user.isEmailVerified,
-          user.createdById ?? undefined,
-          Boolean(user.activate),
-          user.createdAt,
-          user.updatedAt,
-        );
-        userEntity.school = {
-          id: user.school?.id ?? '',
-          name: user.school?.name ?? '',
-          address: user.school?.address ?? undefined,
-          phone: user.school?.phone ?? undefined,
-          imgUrl: user.school?.imgUrl ?? undefined,
-          department: user.school?.department ?? undefined,
-          municipality: user.school?.municipality ?? undefined,
-          mail: user.school?.mail ?? undefined,
-          website: user.school?.website ?? undefined,
-          createdAt: user.school?.createdAt ?? new Date(),
-          updatedAt: user.school?.updatedAt ?? new Date(),
-        };
-        userEntity.sede = {
-          id: user.sede?.id ?? '',
-          name: user.sede?.name ?? '',
-          address: user.sede?.address ?? undefined,
-          phone: user.sede?.phone ?? undefined,
-          createdAt: user.sede?.createdAt ?? new Date(),
-          updatedAt: user.sede?.updatedAt ?? new Date(),
-        };
-        return userEntity;
-      }),
-      total,
-    };
-  }
+    const mapped = users.map((user) => {
+      const userEntity = new User(
+        user.id,
+        user.email,
+        user.password,
+        user.firstName,
+        user.lastName,
+        user.role,
+        user.isEmailVerified,
+        user.createdById ?? undefined,
+        Boolean(user.activate),
+        user.createdAt,
+        user.updatedAt,
+      );
+      userEntity.school = {
+        id: user.school?.id ?? '',
+        name: user.school?.name ?? '',
+        address: user.school?.address ?? undefined,
+        phone: user.school?.phone ?? undefined,
+        imgUrl: user.school?.imgUrl ?? undefined,
+        department: user.school?.department ?? undefined,
+        municipality: user.school?.municipality ?? undefined,
+        mail: user.school?.mail ?? undefined,
+        website: user.school?.website ?? undefined,
+        createdAt: user.school?.createdAt ?? new Date(),
+        updatedAt: user.school?.updatedAt ?? new Date(),
+      };
+      userEntity.sede = {
+        id: user.sede?.id ?? '',
+        name: user.sede?.name ?? '',
+        address: user.sede?.address ?? undefined,
+        phone: user.sede?.phone ?? undefined,
+        createdAt: user.sede?.createdAt ?? new Date(),
+        updatedAt: user.sede?.updatedAt ?? new Date(),
+      };
+      return userEntity;
+    });
 
-  async getUsersStatistics(
-    search?: string,
-    role?: Role,
-    schoolId?: string,
-    createdById?: string,
-    activate?: boolean,
-    isEmailVerified?: boolean,
-  ): Promise<{ docentes: number; activos: number; cantidadSedes: number }> {
-    const whereCondition: Record<string, any> = {};
-
-    if (search) {
-      whereCondition.OR = [
-        { firstName: { contains: search, mode: 'insensitive' as const } },
-        { lastName: { contains: search, mode: 'insensitive' as const } },
-        { email: { contains: search, mode: 'insensitive' as const } },
-      ];
-    }
-    if (role) {
-      whereCondition.role = role;
-    }
-    if (schoolId) {
-      whereCondition.schoolId = schoolId;
-    }
-    if (createdById) {
-      whereCondition.createdById = createdById;
-    }
-    if (activate !== undefined) {
-      whereCondition.activate = activate;
-    }
-    if (isEmailVerified !== undefined) {
-      whereCondition.isEmailVerified = isEmailVerified;
-    }
-
-    const [docentes, activos, sedes] = await Promise.all([
-      this.prisma.user.count({
-        where:
-          whereCondition.role && whereCondition.role !== 'DOCENTE'
-            ? { AND: [whereCondition, { role: 'DOCENTE' }] }
-            : { ...whereCondition, role: 'DOCENTE' },
-      }),
-      this.prisma.user.count({
-        where:
-          whereCondition.activate !== undefined && !whereCondition.activate
-            ? { AND: [whereCondition, { activate: true }] }
-            : { ...whereCondition, activate: true },
-      }),
-      this.prisma.user.findMany({
-        where: { ...whereCondition, sedeId: { not: null } },
-        distinct: ['sedeId'],
-        select: { sedeId: true },
-      }),
-    ]);
-
-    return { docentes, activos, cantidadSedes: sedes.length };
+    return { users: mapped, total };
   }
 
   async getAllUsersBySchool(
