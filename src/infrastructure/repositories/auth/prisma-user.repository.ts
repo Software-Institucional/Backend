@@ -298,10 +298,10 @@ export class PrismaUserRepository implements UserRepository {
     if (createdById) {
       whereCondition.createdById = createdById;
     }
-    if (activate) {
+    if (activate !== undefined) {
       whereCondition.activate = activate;
     }
-    if (isEmailVerified) {
+    if (isEmailVerified !== undefined) {
       whereCondition.isEmailVerified = isEmailVerified;
     }
 
