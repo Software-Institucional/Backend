@@ -33,6 +33,14 @@ export interface UserRepository {
     activate?: boolean,
     isEmailVerified?: boolean,
   ): Promise<{ users: User[]; total: number }>;
+  getUsersStatistics(
+    search?: string,
+    role?: Role,
+    schoolId?: string,
+    createdById?: string,
+    activate?: boolean,
+    isEmailVerified?: boolean,
+  ): Promise<{ docentes: number; activos: number; cantidadSedes: number }>;
   getAllUsersBySchool(
     search?: string,
     role?: Role,

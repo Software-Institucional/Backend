@@ -39,8 +39,14 @@ export class AllUSerUseCase {
     }
 
     // Convertir page y limit a números (opcionales)
-    const page = request.page !== undefined && request.page !== null ? parseInt(request.page.toString(), 10) : 1;
-    const limit = request.limit !== undefined && request.limit !== null ? parseInt(request.limit.toString(), 10) : 10;
+    const page =
+      request.page !== undefined && request.page !== null
+        ? parseInt(request.page.toString(), 10)
+        : 1;
+    const limit =
+      request.limit !== undefined && request.limit !== null
+        ? parseInt(request.limit.toString(), 10)
+        : 10;
     const { search, role, schoolId, activate, isEmailVerified } = request;
 
     // Validar que schoolId esté presente
@@ -65,13 +71,23 @@ export class AllUSerUseCase {
       isEmailVerified,
     );
 
+    const { docentes, activos, cantidadSedes } =
+      await this.userRepository.getUsersStatistics(
+        search,
+        role,
+        schoolId,
+        createdById,
+        activate,
+        isEmailVerified,
+      );
+
     const totalPages = Math.ceil(total / limit);
     const totalUsers = total;
-    const docentes = users.filter((u) => u.role === 'DOCENTE').length;
-    const activos = users.filter((u) => u.activate).length;
-    const cantidadSedes = new Set(
-      users.filter((u) => u.sede && u.sede.id).map((u) => u.sede?.id),
-    ).size;
+    // const docentes = users.filter((u) => u.role === 'DOCENTE').length;
+    // const activos = users.filter((u) => u.activate).length;
+    // const cantidadSedes = new Set(
+    //   users.filter((u) => u.sede && u.sede.id).map((u) => u.sede?.id),
+    // ).size;
 
     return {
       users: users.map((u) => ({

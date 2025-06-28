@@ -362,6 +362,62 @@ export class PrismaUserRepository implements UserRepository {
     };
   }
 
+  async getUsersStatistics(
+    search?: string,
+    role?: Role,
+    schoolId?: string,
+    createdById?: string,
+    activate?: boolean,
+    isEmailVerified?: boolean,
+  ): Promise<{ docentes: number; activos: number; cantidadSedes: number }> {
+    const whereCondition: Record<string, any> = {};
+
+    if (search) {
+      whereCondition.OR = [
+        { firstName: { contains: search, mode: 'insensitive' as const } },
+        { lastName: { contains: search, mode: 'insensitive' as const } },
+        { email: { contains: search, mode: 'insensitive' as const } },
+      ];
+    }
+    if (role) {
+      whereCondition.role = role;
+    }
+    if (schoolId) {
+      whereCondition.schoolId = schoolId;
+    }
+    if (createdById) {
+      whereCondition.createdById = createdById;
+    }
+    if (activate !== undefined) {
+      whereCondition.activate = activate;
+    }
+    if (isEmailVerified !== undefined) {
+      whereCondition.isEmailVerified = isEmailVerified;
+    }
+
+    const [docentes, activos, sedes] = await Promise.all([
+      this.prisma.user.count({
+        where:
+          whereCondition.role && whereCondition.role !== 'DOCENTE'
+            ? { AND: [whereCondition, { role: 'DOCENTE' }] }
+            : { ...whereCondition, role: 'DOCENTE' },
+      }),
+      this.prisma.user.count({
+        where:
+          whereCondition.activate !== undefined && !whereCondition.activate
+            ? { AND: [whereCondition, { activate: true }] }
+            : { ...whereCondition, activate: true },
+      }),
+      this.prisma.user.findMany({
+        where: { ...whereCondition, sedeId: { not: null } },
+        distinct: ['sedeId'],
+        select: { sedeId: true },
+      }),
+    ]);
+
+    return { docentes, activos, cantidadSedes: sedes.length };
+  }
+
   async getAllUsersBySchool(
     search?: string,
     role?: Role,
