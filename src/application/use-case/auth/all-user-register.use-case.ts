@@ -64,7 +64,7 @@ export class AllUSerUseCase {
     );
 
     const totalPages = Math.ceil(total / limit);
-    const totalUsers = users.length;
+    const totalUsers = total;
     const docentes = users.filter((u) => u.role === 'DOCENTE').length;
     const activos = users.filter((u) => u.activate).length;
     const cantidadSedes = new Set(
