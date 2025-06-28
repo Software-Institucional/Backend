@@ -297,60 +297,57 @@ export class PrismaUserRepository implements UserRepository {
     if (isEmailVerified !== undefined)
       filters.isEmailVerified = isEmailVerified;
 
-    const [users, total] = await Promise.all([
-      this.prisma.user.findMany({
-        where: filters,
-        include: {
-          school: true,
-          sede: true,
-        },
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      this.prisma.user.count({
-        where: filters,
-      }),
-    ]);
-
-    const mapped = users.map((user) => {
-      const userEntity = new User(
-        user.id,
-        user.email,
-        user.password,
-        user.firstName,
-        user.lastName,
-        user.role,
-        user.isEmailVerified,
-        user.createdById ?? undefined,
-        Boolean(user.activate),
-        user.createdAt,
-        user.updatedAt,
-      );
-      userEntity.school = {
-        id: user.school?.id ?? '',
-        name: user.school?.name ?? '',
-        address: user.school?.address ?? undefined,
-        phone: user.school?.phone ?? undefined,
-        imgUrl: user.school?.imgUrl ?? undefined,
-        department: user.school?.department ?? undefined,
-        municipality: user.school?.municipality ?? undefined,
-        mail: user.school?.mail ?? undefined,
-        website: user.school?.website ?? undefined,
-        createdAt: user.school?.createdAt ?? new Date(),
-        updatedAt: user.school?.updatedAt ?? new Date(),
-      };
-      userEntity.sede = {
-        id: user.sede?.id ?? '',
-        name: user.sede?.name ?? '',
-        address: user.sede?.address ?? undefined,
-        phone: user.sede?.phone ?? undefined,
-        createdAt: user.sede?.createdAt ?? new Date(),
-        updatedAt: user.sede?.updatedAt ?? new Date(),
-      };
-      return userEntity;
+    const total = await this.prisma.user.count({
+      where: filters, // 👈 ve todos los que cumplen filtro
     });
 
-    return { users: mapped, total };
+    const users = await this.prisma.user.findMany({
+      where: filters,
+      include: { school: true, sede: true },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      users: users.map((u) => {
+        const entity = new User(
+          u.id,
+          u.email,
+          u.password,
+          u.firstName,
+          u.lastName,
+          u.role,
+          u.isEmailVerified,
+          u.createdById ?? undefined,
+          Boolean(u.activate),
+          u.createdAt,
+          u.updatedAt,
+        );
+        entity.school = {
+          id: u.school?.id ?? '',
+          name: u.school?.name ?? '',
+          address: u.school?.address ?? undefined,
+          phone: u.school?.phone ?? undefined,
+          imgUrl: u.school?.imgUrl ?? undefined,
+          department: u.school?.department ?? undefined,
+          municipality: u.school?.municipality ?? undefined,
+          mail: u.school?.mail ?? undefined,
+          website: u.school?.website ?? undefined,
+          createdAt: u.school?.createdAt ?? new Date(),
+          updatedAt: u.school?.updatedAt ?? new Date(),
+        };
+        entity.sede = {
+          id: u.sede?.id ?? '',
+          name: u.sede?.name ?? '',
+          address: u.sede?.address ?? undefined,
+          phone: u.sede?.phone ?? undefined,
+          createdAt: u.sede?.createdAt ?? new Date(),
+          updatedAt: u.sede?.updatedAt ?? new Date(),
+        };
+        return entity;
+      }),
+      total,
+    };
   }
 
   async getAllUsersBySchool(
