@@ -23,35 +23,39 @@ export class ForgotPasswordUseCase {
   async execute(
     request: ForgotPasswordRequestDto,
   ): Promise<ForgotPasswordResponseDto> {
-    // Check if user exists
     const user = await this.userRepository.findByEmail(request.email);
     if (!user) {
-      // Don't reveal if email exists or not for security
       return {
         message:
           'Si el email existe, se ha enviado un enlace para restablecer la contraseña.',
       };
     }
 
-    // Generate reset token
-    const resetToken = this.passwordService.generateResetToken();
+    const token = this.passwordService.generateResetToken();
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hora
 
-    // Create password reset entity
-    const passwordReset = PasswordReset.create(request.email, resetToken);
+    const existing = await this.passwordResetRepository.findByEmail(
+      request.email,
+    );
+    const latest = existing[0]; // Asumimos 1 solo por usuario (mejor usar `findFirst`)
 
-    // Save password reset
-    await this.passwordResetRepository.save(passwordReset);
-
-    // Send reset email
-    try {
-      await this.emailService.sendPasswordResetEmail(request.email, resetToken);
-      console.log(`Email de restablecimiento enviado a: ${request.email}`);
-    } catch (error) {
-      console.error(
-        `Error enviando email de restablecimiento a ${request.email}:`,
-        error instanceof Error ? error.message : String(error),
+    if (latest) {
+      // ✅ Actualiza el registro existente
+      await this.passwordResetRepository.updateTokenById(
+        latest.id,
+        token,
+        expiresAt,
       );
-      // No lanzar error para no revelar si el email existe
+    } else {
+      // ✅ Crea solo si no existe uno
+      const newReset = PasswordReset.create(request.email, token);
+      await this.passwordResetRepository.save(newReset);
+    }
+
+    try {
+      await this.emailService.sendPasswordResetEmail(request.email, token);
+    } catch (error) {
+      console.error('Error enviando email:', error);
     }
 
     return {

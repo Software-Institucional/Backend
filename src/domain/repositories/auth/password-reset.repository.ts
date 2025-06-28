@@ -6,4 +6,9 @@ export interface PasswordResetRepository {
   save(passwordReset: PasswordReset): Promise<PasswordReset>;
   update(passwordReset: PasswordReset): Promise<PasswordReset>;
   delete(id: string): Promise<void>;
+  updateTokenById(
+    id: string,
+    newToken: string,
+    newExpiresAt: Date,
+  ): Promise<void>;
 }

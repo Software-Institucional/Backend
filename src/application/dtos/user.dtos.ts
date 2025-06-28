@@ -143,19 +143,12 @@ export class SedeDto {
 }
 
 export class AllUserRequestDto {
-  @ApiProperty({ example: 'Juan', required: false })
   search?: string;
-  @ApiProperty({
-    example: 'ADMIN',
-    enum: ['SUPER', 'ADMIN', 'DOCENTE'],
-    required: false,
-  })
   role?: Role;
-  @ApiProperty({ example: 'uuid-school', required: false })
+  activate?: boolean;
+  isEmailVerified?: boolean;
   schoolId?: string;
-  @ApiProperty({ example: 1, default: 1, required: false })
   page?: number;
-  @ApiProperty({ example: 10, default: 10, required: false })
   limit?: number;
 }
 

@@ -39,9 +39,9 @@ export class AllUSerUseCase {
     }
 
     // Convertir page y limit a números (opcionales)
-    const page = request.page ? parseInt(request.page.toString(), 10) : 1;
-    const limit = request.limit ? parseInt(request.limit.toString(), 10) : 10;
-    const { search, role, schoolId } = request;
+    const page = request.page !== undefined && request.page !== null ? parseInt(request.page.toString(), 10) : 1;
+    const limit = request.limit !== undefined && request.limit !== null ? parseInt(request.limit.toString(), 10) : 10;
+    const { search, role, schoolId, activate, isEmailVerified } = request;
 
     // Validar que schoolId esté presente
     if (!schoolId) {
@@ -61,6 +61,8 @@ export class AllUSerUseCase {
       page,
       limit,
       createdById,
+      activate,
+      isEmailVerified,
     );
 
     const totalPages = Math.ceil(total / limit);

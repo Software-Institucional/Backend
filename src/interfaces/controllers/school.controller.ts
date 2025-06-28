@@ -106,7 +106,7 @@ export class SchoolController {
     });
   }
 
-  @Patch('update')
+  @Patch()
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiConsumes('multipart/form-data')

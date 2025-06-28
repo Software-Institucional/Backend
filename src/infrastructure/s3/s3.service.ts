@@ -21,7 +21,12 @@ export class S3Service {
   }
 
   async uploadFile(file: Express.Multer.File): Promise<string> {
-    const key = `schools/${uuidv4()}-${file.originalname}`;
+    const sanitizedFileName = file.originalname
+      .trim()
+      .replace(/\s+/g, '_') // Reemplaza espacios por guión bajo
+      .replace(/[^\w.-]/g, ''); // Elimina caracteres raros o inseguros
+
+    const key = `entity/${uuidv4()}-${sanitizedFileName}`;
 
     await this.s3.send(
       new PutObjectCommand({
@@ -40,8 +45,9 @@ export class S3Service {
   async deleteFile(fileUrl: string): Promise<void> {
     try {
       // Extraer el "key" desde la URL
-      const bucketUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.amazonaws.com/`;
-      const key = fileUrl.replace(bucketUrl, '');
+      // const bucketUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.amazonaws.com/`;
+      const key = decodeURIComponent(new URL(fileUrl).pathname.slice(1));
+      console.log('S3 Key to delete:', key);
 
       await this.s3.send(
         new DeleteObjectCommand({

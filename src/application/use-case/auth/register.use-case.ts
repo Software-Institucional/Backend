@@ -123,13 +123,13 @@ export class RegisterUseCase {
     // Generar token para establecer contraseña
     const setupToken = this.passwordService.generateResetToken();
     const passwordReset = PasswordReset.create(email, setupToken);
+    await this.passwordResetRepository.save(passwordReset);
 
     try {
       // Guardar usuario
       const savedUser = await this.userRepository.save(user, schoolId, sedeId);
 
       // Guardar token de reset
-      await this.passwordResetRepository.save(passwordReset);
 
       // Enviar email de bienvenida con token
       await this.sendWelcomeEmail(email, firstName, setupToken);

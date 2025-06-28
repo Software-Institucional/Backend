@@ -94,4 +94,20 @@ export class PrismaPasswordResetRepository implements PasswordResetRepository {
       where: { id },
     });
   }
+
+  async updateTokenById(
+    id: string,
+    newToken: string,
+    newExpiresAt: Date,
+  ): Promise<void> {
+    await this.prisma.passwordReset.update({
+      where: { id },
+      data: {
+        token: newToken,
+        expiresAt: newExpiresAt,
+        isUsed: false,
+        createdAt: new Date(),
+      },
+    });
+  }
 }

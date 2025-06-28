@@ -30,6 +30,8 @@ export interface UserRepository {
     page?: number,
     limit?: number,
     createdById?: string,
+    activate?: boolean,
+    isEmailVerified?: boolean,
   ): Promise<{ users: User[]; total: number }>;
   getAllUsersBySchool(
     search?: string,

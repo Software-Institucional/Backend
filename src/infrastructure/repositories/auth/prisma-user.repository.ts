@@ -274,9 +274,11 @@ export class PrismaUserRepository implements UserRepository {
     search?: string,
     role?: Role,
     schoolId?: string,
-    page = 1,
-    limit = 10,
+    page?: number,
+    limit?: number,
     createdById?: string,
+    activate?: boolean,
+    isEmailVerified?: boolean,
   ): Promise<{ users: User[]; total: number }> {
     const whereCondition: Record<string, any> = {};
 
@@ -296,6 +298,12 @@ export class PrismaUserRepository implements UserRepository {
     if (createdById) {
       whereCondition.createdById = createdById;
     }
+    if (activate) {
+      whereCondition.activate = activate;
+    }
+    if (isEmailVerified) {
+      whereCondition.isEmailVerified = isEmailVerified;
+    }
 
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
@@ -304,7 +312,7 @@ export class PrismaUserRepository implements UserRepository {
           school: true,
           sede: true,
         },
-        skip: (page - 1) * limit,
+        skip: (page! - 1) * limit!,
         take: limit,
       }),
       this.prisma.user.count({
