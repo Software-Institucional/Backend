@@ -282,14 +282,6 @@ export class PrismaUserRepository implements UserRepository {
   ): Promise<{ users: User[]; total: number }> {
     const filters: Prisma.UserWhereInput = {};
 
-    if (search) {
-      filters.OR = [
-        { firstName: { contains: search, mode: 'insensitive' } },
-        { lastName: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } },
-      ];
-    }
-
     if (role) filters.role = role;
     if (schoolId) filters.schoolId = schoolId;
     if (createdById) filters.createdById = createdById;
@@ -297,55 +289,74 @@ export class PrismaUserRepository implements UserRepository {
     if (isEmailVerified !== undefined)
       filters.isEmailVerified = isEmailVerified;
 
-    const total = await this.prisma.user.count({
-      where: filters, // 👈 ve todos los que cumplen filtro
-    });
+    // 👉 Para usar raw SQL con nombre completo
 
-    const users = await this.prisma.user.findMany({
+    // 1. Filtras con prisma sin usar paginación (solo filters "duros" como schoolId, activate, etc.)
+    let allUsers = await this.prisma.user.findMany({
       where: filters,
       include: { school: true, sede: true },
-      skip: (page - 1) * limit,
-      take: limit,
+    });
+
+    // 2. Luego aplicas `search` en memoria
+    if (search && search.trim().length > 0) {
+      const searchLower = search.trim().toLowerCase();
+      allUsers = allUsers.filter((u) => {
+        const fullName = `${u.firstName} ${u.lastName}`.toLowerCase();
+        return (
+          fullName.includes(searchLower) ||
+          u.firstName.toLowerCase().includes(searchLower) ||
+          u.lastName.toLowerCase().includes(searchLower) ||
+          u.email.toLowerCase().includes(searchLower)
+        );
+      });
+    }
+
+    // 3. Luego haces paginación
+    const total = allUsers.length;
+    const start = (page - 1) * limit;
+    const paginated = allUsers.slice(start, start + limit);
+
+    // 👇 mapeas igual que antes
+    const mapped = paginated.map((u) => {
+      const userEntity = new User(
+        u.id,
+        u.email,
+        u.password,
+        u.firstName,
+        u.lastName,
+        u.role,
+        u.isEmailVerified,
+        u.createdById ?? undefined,
+        Boolean(u.activate),
+        u.createdAt,
+        u.updatedAt,
+      );
+      userEntity.school = {
+        id: u.school?.id ?? '',
+        name: u.school?.name ?? '',
+        address: u.school?.address ?? undefined,
+        phone: u.school?.phone ?? undefined,
+        imgUrl: u.school?.imgUrl ?? undefined,
+        department: u.school?.department ?? undefined,
+        municipality: u.school?.municipality ?? undefined,
+        mail: u.school?.mail ?? undefined,
+        website: u.school?.website ?? undefined,
+        createdAt: u.school?.createdAt ?? new Date(),
+        updatedAt: u.school?.updatedAt ?? new Date(),
+      };
+      userEntity.sede = {
+        id: u.sede?.id ?? '',
+        name: u.sede?.name ?? '',
+        address: u.sede?.address ?? undefined,
+        phone: u.sede?.phone ?? undefined,
+        createdAt: u.sede?.createdAt ?? new Date(),
+        updatedAt: u.sede?.updatedAt ?? new Date(),
+      };
+      return userEntity;
     });
 
     return {
-      users: users.map((u) => {
-        const entity = new User(
-          u.id,
-          u.email,
-          u.password,
-          u.firstName,
-          u.lastName,
-          u.role,
-          u.isEmailVerified,
-          u.createdById ?? undefined,
-          Boolean(u.activate),
-          u.createdAt,
-          u.updatedAt,
-        );
-        entity.school = {
-          id: u.school?.id ?? '',
-          name: u.school?.name ?? '',
-          address: u.school?.address ?? undefined,
-          phone: u.school?.phone ?? undefined,
-          imgUrl: u.school?.imgUrl ?? undefined,
-          department: u.school?.department ?? undefined,
-          municipality: u.school?.municipality ?? undefined,
-          mail: u.school?.mail ?? undefined,
-          website: u.school?.website ?? undefined,
-          createdAt: u.school?.createdAt ?? new Date(),
-          updatedAt: u.school?.updatedAt ?? new Date(),
-        };
-        entity.sede = {
-          id: u.sede?.id ?? '',
-          name: u.sede?.name ?? '',
-          address: u.sede?.address ?? undefined,
-          phone: u.sede?.phone ?? undefined,
-          createdAt: u.sede?.createdAt ?? new Date(),
-          updatedAt: u.sede?.updatedAt ?? new Date(),
-        };
-        return entity;
-      }),
+      users: mapped,
       total,
     };
   }
