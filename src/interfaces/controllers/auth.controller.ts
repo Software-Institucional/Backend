@@ -115,7 +115,7 @@ export class AuthController {
       httpOnly: true,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+      maxAge: 35 * 24 * 60 * 60 * 1000, // 7 días
       path: '/',
       domain: cookieConfig.domain,
     });
@@ -125,7 +125,7 @@ export class AuthController {
       httpOnly: false,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
-      maxAge: 2 * 60 * 1000, // 35 minutos
+      maxAge: 35 * 60 * 1000, // 35 minutos
       path: '/',
       domain: cookieConfig.domain,
     });
@@ -164,7 +164,7 @@ export class AuthController {
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
       path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+      maxAge: 35 * 24 * 60 * 60 * 1000, // 7 días
       domain: cookieConfig.domain,
     });
 
@@ -175,7 +175,7 @@ export class AuthController {
       sameSite: cookieConfig.sameSite,
       path: '/',
       domain: cookieConfig.domain,
-      maxAge: 2 * 60 * 1000, // 35 minutos
+      maxAge: 35 * 60 * 1000, // 35 minutos
     });
 
     return result;
