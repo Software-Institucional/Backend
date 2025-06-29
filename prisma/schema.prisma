@@ -63,7 +63,7 @@ model PasswordReset {
 
 model School {
   id           String  @id @default(uuid())
-  name         String  @unique
+  name         String  
   address      String?
   phone        String?
   imgUrl       String?
@@ -82,7 +82,7 @@ model School {
 
 model Sede {
   id       String  @id @default(uuid())
-  name     String  @unique
+  name     String  
   address  String?
   phone    String?
   schoolId String
