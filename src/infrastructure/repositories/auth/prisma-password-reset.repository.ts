@@ -43,6 +43,11 @@ export class PrismaPasswordResetRepository implements PasswordResetRepository {
   }
 
   async save(passwordReset: PasswordReset): Promise<PasswordReset> {
+    // Borra todos los tokens previos de ese email antes de crear uno nuevo
+    await this.prisma.passwordReset.deleteMany({
+      where: { email: passwordReset.email },
+    });
+
     const savedReset = await this.prisma.passwordReset.create({
       data: {
         id: passwordReset.id,
