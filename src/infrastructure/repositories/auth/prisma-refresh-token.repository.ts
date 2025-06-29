@@ -43,10 +43,16 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
   }
 
   async save(refreshToken: RefreshToken): Promise<RefreshToken> {
-    // Eliminar todos los refresh tokens anteriores del usuario
-    await this.prisma.refreshToken.deleteMany({
+    const tokens = await this.prisma.refreshToken.findMany({
       where: { userId: refreshToken.userId },
+      orderBy: { createdAt: 'desc' },
     });
+    if (tokens.length >= 6) {
+      const tokensToDelete = tokens.slice(5); // deja solo los 5 más nuevos
+      await this.prisma.refreshToken.deleteMany({
+        where: { id: { in: tokensToDelete.map((t) => t.id) } },
+      });
+    }
 
     const savedToken = await this.prisma.refreshToken.create({
       data: {

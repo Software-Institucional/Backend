@@ -5,6 +5,7 @@ import { PrismaService } from './infrastructure/prisma/prisma.service';
 import { AuthModule } from './module/auth.module';
 import { SchoolModule } from './module/school.module';
 import { SedeModule } from './module/sede.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { SedeModule } from './module/sede.module';
     AuthModule,
     SchoolModule,
     SedeModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [],
   providers: [PrismaService],
