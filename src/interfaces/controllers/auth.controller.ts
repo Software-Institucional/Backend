@@ -26,6 +26,7 @@ import {
   LoginRequestDto,
   LoginResponseDto,
   LogoutResponseDto,
+  RefreshTokenResponseDto,
   RegisterRequestDto,
   RegisterResponseDto,
   ResetPasswordRequestDto,
@@ -111,7 +112,7 @@ export class AuthController {
 
     // Configuración de cookies para refreshToken
     res.cookie('refreshToken', result.refreshToken, {
-      httpOnly: true,
+      httpOnly: false,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
@@ -134,32 +135,66 @@ export class AuthController {
 
   @Get('refresh')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiResponse({
+    status: 200,
+    description: 'Token refreshed successfully',
+    type: RefreshTokenResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Invalid refresh token' })
   async refresh(
     @Req() req: RequestWithCookies,
     @Res({ passthrough: true }) res: Response,
   ) {
     const refreshToken = req.cookies?.refreshToken;
-    if (!refreshToken) throw new UnauthorizedException('No refresh token');
 
-    const result = await this.refreshTokenUseCase.execute({ refreshToken });
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token not found in cookies');
+    }
+
+    const result = await this.refreshTokenUseCase.execute({
+      refreshToken,
+    });
+
     const cookieConfig = this.getCookieConfig(req);
 
-    res.clearCookie('refreshToken', { ...cookieConfig, httpOnly: true });
-    res.clearCookie('accessToken', { ...cookieConfig, httpOnly: false });
-
-    res.cookie('refreshToken', result.refreshToken, {
-      ...cookieConfig,
-      httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-    res.cookie('accessToken', result.accessToken, {
-      ...cookieConfig,
+    // Limpia las cookies antiguas antes de establecer las nuevas
+    res.clearCookie('refreshToken', {
       httpOnly: false,
-      maxAge: 1 * 60 * 1000,
+      secure: cookieConfig.secure,
+      sameSite: cookieConfig.sameSite,
+      path: '/',
+      domain: cookieConfig.domain,
+    });
+    res.clearCookie('accessToken', {
+      httpOnly: false,
+      secure: cookieConfig.secure,
+      sameSite: cookieConfig.sameSite,
+      path: '/',
+      domain: cookieConfig.domain,
     });
 
-    // Aquí asegúrate de usar res.send y NO res.json si hay problemas de cookies
-    res.send(result);
+    // Configuración de cookies para refreshToken
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: false,
+      secure: cookieConfig.secure,
+      sameSite: cookieConfig.sameSite,
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+      domain: cookieConfig.domain,
+    });
+
+    // Configuración de cookies para accessToken
+    res.cookie('accessToken', result.accessToken, {
+      httpOnly: false,
+      secure: cookieConfig.secure,
+      sameSite: cookieConfig.sameSite,
+      path: '/',
+      domain: cookieConfig.domain,
+      maxAge: 1 * 60 * 1000, // 35 minutos
+    });
+
+    return result;
   }
 
   @Post('forgot-password')
