@@ -156,55 +156,22 @@ export class AuthController {
       refreshToken,
     });
 
-    // Configuración de dominios antiguos y nuevos
-    const domains = [
-      '.eduadminsoft.shop',
-      'www.eduadminsoft.shop',
-      'eduadminsoft.shop',
-    ];
-
-    // Limpia cookies en TODOS los posibles dominios
-    for (const domain of domains) {
-      res.clearCookie('refreshToken', {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        path: '/',
-        domain,
-      });
-      res.clearCookie('accessToken', {
-        httpOnly: false,
-        secure: true,
-        sameSite: 'none',
-        path: '/',
-        domain,
-      });
-    }
-
-    // Ahora SÓLO coloca las nuevas cookies en el dominio correcto
-    // Elige el dominio real de la request:
-    const origin = req.headers.origin || '';
-    const isProd = origin.includes('eduadminsoft.shop');
-    const cookieDomain = isProd ? 'www.eduadminsoft.shop' : undefined;
-
-    // Set refreshToken
+    // Configuración de cookies para refreshToken
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
       path: '/',
-      domain: cookieDomain,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+      domain: '.eduadminsoft.shop', // <- SIEMPRE ESTE
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-
-    // Set accessToken
     res.cookie('accessToken', result.accessToken, {
       httpOnly: false,
       secure: true,
       sameSite: 'none',
       path: '/',
-      domain: cookieDomain,
-      maxAge: 35 * 60 * 1000, // 35 minutos
+      domain: '.eduadminsoft.shop', // <- SIEMPRE ESTE
+      maxAge: 1 * 60 * 1000,
     });
 
     return result;
