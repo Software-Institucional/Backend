@@ -74,7 +74,7 @@ export class AuthController {
     return {
       secure: true, // Requerido para SameSite=None
       sameSite: 'none' as const, // Requerido para cross-site
-      domain: isProduction ? 'www.eduadminsoft.shop' : undefined,
+      domain: isProduction ? '.eduadminsoft.shop' : undefined,
     };
   }
 
