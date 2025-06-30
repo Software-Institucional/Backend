@@ -64,17 +64,17 @@ export class AuthController {
   ) {}
 
   private getCookieConfig(req: Request) {
-    const origin = req.headers.origin || '';
-    const allowedOrigins = [
-      'https://www.eduadminsoft.shop',
-      'https://eduadminsoft.shop',
-    ];
-    const isProduction = allowedOrigins.includes(origin);
+    const host = req.headers.host || '';
+    let domain: string | undefined = undefined;
+
+    if (host.endsWith('eduadminsoft.shop')) {
+      domain = '.eduadminsoft.shop';
+    }
 
     return {
-      secure: true, // Requerido para SameSite=None
-      sameSite: 'none' as const, // Requerido para cross-site
-      domain: isProduction ? '.eduadminsoft.shop' : undefined,
+      secure: true,
+      sameSite: 'none' as const,
+      domain,
     };
   }
 
