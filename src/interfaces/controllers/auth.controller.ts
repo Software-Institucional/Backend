@@ -84,21 +84,34 @@ export class AuthController {
 
   private getCookieConfig(req: Request) {
     const origin = req.headers.origin || req.headers.host || '';
-    let domain: string | undefined = undefined;
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isLocalhost =
+      origin.includes('localhost') || origin.includes('127.0.0.1');
 
-    // SOLO pones dominio en prod, nunca en local
+    let domain: string | undefined = undefined;
+    let secure = false;
+    let sameSite: 'none' | 'lax' | 'strict' = 'lax';
+
     if (
-      origin.includes('.eduadminsoft.shop') ||
-      origin.includes('www.eduadminsoft.shop')
+      isProduction &&
+      (origin.includes('.eduadminsoft.shop') ||
+        origin.includes('www.eduadminsoft.shop'))
     ) {
-      domain = '.eduadminsoft.shop'; // Producción
+      // Production configuration
+      domain = '.eduadminsoft.shop';
+      secure = true;
+      sameSite = 'none'; // For cross-site requests
+    } else if (isLocalhost) {
+      // Local development configuration
+      domain = undefined; // Don't set domain for localhost
+      secure = false; // HTTP in development
+      sameSite = 'lax'; // More permissive for development
     }
-    // Si es local, domain queda undefined
 
     return {
-      secure: true, // Siempre true para SameSite=None (obligatorio)
-      sameSite: 'none' as const, // Siempre none para cross-site
-      domain, // undefined en local, .eduadminsoft.shop en prod
+      secure,
+      sameSite,
+      domain,
     };
   }
 
