@@ -64,23 +64,17 @@ export class AuthController {
   ) {}
 
   private getCookieConfig(req: Request) {
-    // 1. Detecta si es local o producción
-    const host = req.headers.host || '';
-    let domain: string | undefined = undefined;
-    let secure = true;
-
-    if (host.includes('localhost') || host.startsWith('127.')) {
-      domain = undefined; // ⚠️ NO pongas dominio en local
-      secure = false; // ⚠️ NO pongas secure en local
-    } else if (host.includes('.eduadminsoft.shop')) {
-      domain = '.eduadminsoft.shop'; // ⚠️ SOLO para prod
-      secure = true;
-    }
+    const origin = req.headers.origin || '';
+    const allowedOrigins = [
+      'https://www.eduadminsoft.shop',
+      'https://eduadminsoft.shop',
+    ];
+    const isProduction = allowedOrigins.includes(origin);
 
     return {
-      secure,
-      sameSite: 'none' as const,
-      domain,
+      secure: true, // Requerido para SameSite=None
+      sameSite: 'none' as const, // Requerido para cross-site
+      domain: isProduction ? '.eduadminsoft.shop' : undefined,
     };
   }
 
