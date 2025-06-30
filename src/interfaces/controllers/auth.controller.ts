@@ -64,17 +64,21 @@ export class AuthController {
   ) {}
 
   private getCookieConfig(req: Request) {
-    const host = req.headers.host || '';
+    const origin = req.headers.origin || req.headers.host || '';
     let domain: string | undefined = undefined;
 
-    if (host.endsWith('eduadminsoft.shop')) {
-      domain = '.eduadminsoft.shop';
+    if (
+      origin.includes('.eduadminsoft.shop') ||
+      origin.includes('www.eduadminsoft.shop')
+    ) {
+      domain = '.eduadminsoft.shop'; // Solo para prod
     }
+    // Si es localhost o cualquier otro, NO pongas el dominio (queda undefined)
 
     return {
       secure: true,
       sameSite: 'none' as const,
-      domain,
+      domain, // <--- undefined en local, bien en prod
     };
   }
 
