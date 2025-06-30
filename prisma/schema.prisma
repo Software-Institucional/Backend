@@ -30,8 +30,8 @@ model User {
 
   RefreshToken RefreshToken[]
 
-  school          School?  @relation(fields: [schoolId], references: [id])
-  sede            Sede?    @relation(fields: [sedeId], references: [id])
+  school School? @relation(fields: [schoolId], references: [id])
+  sede   Sede?   @relation(fields: [sedeId], references: [id])
 
   createdBy    User?  @relation("UserCreations", fields: [createdById], references: [id])
   createdUsers User[] @relation("UserCreations")
@@ -41,6 +41,7 @@ model RefreshToken {
   id        String   @id @default(uuid())
   token     String   @unique
   userId    String
+  role      String
   expiresAt DateTime
   isRevoked Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -63,7 +64,7 @@ model PasswordReset {
 
 model School {
   id           String  @id @default(uuid())
-  name         String  
+  name         String
   address      String?
   phone        String?
   imgUrl       String?
@@ -76,13 +77,13 @@ model School {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users  User[]
-  sedes  Sede[]
+  users User[]
+  sedes Sede[]
 }
 
 model Sede {
   id       String  @id @default(uuid())
-  name     String  
+  name     String
   address  String?
   phone    String?
   schoolId String

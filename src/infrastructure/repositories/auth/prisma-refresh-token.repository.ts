@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { RefreshTokenRepository } from 'src/domain/repositories/auth/refresh-token.repository';
 import { RefreshToken } from 'src/domain/entities/auth/refresh-token.entity';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
@@ -18,6 +19,7 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
       refreshToken.id,
       refreshToken.token,
       refreshToken.userId,
+      refreshToken.role as Role,
       refreshToken.expiresAt,
       refreshToken.isRevoked,
       refreshToken.createdAt,
@@ -35,6 +37,7 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
           token.id,
           token.token,
           token.userId,
+          token.role as Role,
           token.expiresAt,
           token.isRevoked,
           token.createdAt,
@@ -53,6 +56,7 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
         id: refreshToken.id,
         token: refreshToken.token,
         userId: refreshToken.userId,
+        role: refreshToken.role,
         expiresAt: refreshToken.expiresAt,
         isRevoked: refreshToken.isRevoked,
         createdAt: refreshToken.createdAt,
@@ -63,6 +67,7 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
       savedToken.id,
       savedToken.token,
       savedToken.userId,
+      savedToken.role as Role,
       savedToken.expiresAt,
       savedToken.isRevoked,
       savedToken.createdAt,
@@ -81,6 +86,7 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
       updatedToken.id,
       updatedToken.token,
       updatedToken.userId,
+      updatedToken.role as Role,
       updatedToken.expiresAt,
       updatedToken.isRevoked,
       updatedToken.createdAt,

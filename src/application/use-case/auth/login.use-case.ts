@@ -61,7 +61,7 @@ export class LoginUseCase {
     }
 
     // Generate tokens
-    const payload = { sub: user.id, email: user.email };
+    const payload = { sub: user.id, email: user.email, role: user.role };
     const accessToken = this.jwtService.generateAccessToken(payload);
     const refreshTokenValue = this.jwtService.generateRefreshToken(payload);
 
@@ -71,6 +71,7 @@ export class LoginUseCase {
 
     const refreshToken = RefreshToken.create(
       user.id,
+      user.role,
       refreshTokenValue,
       expiresAt,
     );

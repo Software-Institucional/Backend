@@ -48,7 +48,7 @@ export class RefreshTokenUseCase {
     await this.refreshTokenRepository.update(revokedToken);
 
     // Generate new tokens
-    const newPayload = { sub: user.id, email: user.email };
+    const newPayload = { sub: user.id, email: user.email, role: user.role };
     const accessToken = this.jwtService.generateAccessToken(newPayload);
     const newRefreshTokenValue =
       this.jwtService.generateRefreshToken(newPayload);
@@ -59,6 +59,7 @@ export class RefreshTokenUseCase {
 
     const newRefreshToken = RefreshToken.create(
       user.id,
+      user.role,
       newRefreshTokenValue,
       expiresAt,
     );
