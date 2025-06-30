@@ -1,4 +1,12 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
   SedesDtoRequest,
@@ -8,10 +16,15 @@ import { CreateSedeUseCase } from 'src/application/use-case/sede/create-sede.use
 import { JwtAuthGuard } from 'src/infrastructure/guards/jwt.auth.guard';
 import { Request } from 'express';
 import { JwtPayload } from 'src/domain/interfaces/jwt-payload.interface';
+import { DeleteResponseDto } from 'src/application/dtos/user.dtos';
+import { DeleteSedeUseCase } from 'src/application/use-case/sede/delete-sede-use-case';
 
 @Controller('sedes')
 export class SedeController {
-  constructor(private readonly createSedeUseCase: CreateSedeUseCase) {}
+  constructor(
+    private readonly deleteSedeUseCase: DeleteSedeUseCase,
+    private readonly createSedeUseCase: CreateSedeUseCase,
+  ) {}
 
   @Post()
   @ApiBearerAuth()
@@ -28,5 +41,19 @@ export class SedeController {
   ): Promise<SedesDtoResponse> {
     sedesDtoResponse.user = req.user;
     return this.createSedeUseCase.execute(sedesDtoResponse);
+  }
+
+  @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Eliminar sede' })
+  @ApiResponse({
+    status: 200,
+    type: DeleteResponseDto,
+    description: 'Sede eliminada correctamente',
+  })
+  async deleteSede(@Param('id') id: string): Promise<DeleteResponseDto> {
+    await this.deleteSedeUseCase.execute(id);
+    return { message: 'Sede eliminada correctamente' };
   }
 }

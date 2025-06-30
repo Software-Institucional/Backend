@@ -8,6 +8,7 @@ import { PrismaUserRepository } from 'src/infrastructure/repositories/auth/prism
 import { SedeController } from 'src/interfaces/controllers/sede.controller';
 import { JwtAuthGuard } from 'src/infrastructure/guards/jwt.auth.guard';
 import { NestJsJwtService } from 'src/infrastructure/services/nest-jwt.service';
+import { DeleteSedeUseCase } from 'src/application/use-case/sede/delete-sede-use-case';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { NestJsJwtService } from 'src/infrastructure/services/nest-jwt.service';
   controllers: [SedeController],
   providers: [
     CreateSedeUseCase,
+    DeleteSedeUseCase,
     // Guards
     JwtAuthGuard,
     NestJsJwtService,

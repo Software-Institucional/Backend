@@ -345,3 +345,7 @@ export class UpdateUserResponseDto {
     message: string;
   };
 }
+
+export class DeleteResponseDto {
+  message: string;
+}

@@ -11,6 +11,8 @@ import {
   UseGuards,
   Query,
   Put,
+  Delete,
+  Param,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -35,6 +37,7 @@ import {
   AllUsersBySchoolResponseDto,
   UpdateUserRequestDto,
   UpdateUserResponseDto,
+  DeleteResponseDto,
 } from 'src/application/dtos/user.dtos';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from 'src/infrastructure/guards/jwt.auth.guard';
@@ -48,6 +51,7 @@ import { RegisterUseCase } from 'src/application/use-case/auth/register.use-case
 import { ResetPasswordUseCase } from 'src/application/use-case/auth/reset-password.use-case';
 import { AllUSerUseCase } from 'src/application/use-case/auth/all-user-register.use-case';
 import { UpdateUserUseCase } from 'src/application/use-case/auth/update-user.use-case';
+import { DeleteUserUseCase } from 'src/application/use-case/auth/celete-user.use-case';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -61,6 +65,7 @@ export class AuthController {
     private readonly logoutUseCase: LogoutUseCase,
     private readonly allUserUseCase: AllUSerUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
+    private readonly deleteUserUseCase: DeleteUserUseCase,
   ) {}
 
   // private getCookieConfig(req: Request) {
@@ -305,5 +310,19 @@ export class AuthController {
       ...request,
       user: req.user,
     });
+  }
+
+  @Delete('user/:id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Eliminar usuario' })
+  @ApiResponse({
+    status: 200,
+    type: DeleteResponseDto,
+    description: 'Usuario eliminado correctamente',
+  })
+  async deleteUser(@Param('id') id: string): Promise<DeleteResponseDto> {
+    await this.deleteUserUseCase.execute(id);
+    return { message: 'Usuario eliminado correctamente' };
   }
 }

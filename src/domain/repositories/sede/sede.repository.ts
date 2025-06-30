@@ -4,4 +4,5 @@ export interface SedeRepository {
   createSede(sede: Sede): Promise<Sede>;
   findById(id: string): Promise<Sede | null>;
   findBySchoolId(schoolId: string): Promise<Sede[]>;
+  deleteSede(id: string): Promise<void>;
 }

@@ -63,4 +63,8 @@ export class PrismaSedeRepository implements SedeRepository {
         ),
     );
   }
+
+  async deleteSede(id: string): Promise<void> {
+    await this.prisma.sede.delete({ where: { id } });
+  }
 }

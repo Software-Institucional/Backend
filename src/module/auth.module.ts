@@ -21,6 +21,7 @@ import { AllUSerUseCase } from 'src/application/use-case/auth/all-user-register.
 import { PrismaSedeRepository } from 'src/infrastructure/repositories/sede/prisma-sede.repository';
 import { UpdateUserUseCase } from 'src/application/use-case/auth/update-user.use-case';
 import { PrismaSchoolRepository } from 'src/infrastructure/repositories/school/prisma-school.repository';
+import { DeleteUserUseCase } from 'src/application/use-case/auth/celete-user.use-case';
 
 // Use Cases
 
@@ -46,6 +47,7 @@ import { PrismaSchoolRepository } from 'src/infrastructure/repositories/school/p
     LogoutUseCase,
     AllUSerUseCase,
     UpdateUserUseCase,
+    DeleteUserUseCase,
     // Guards
     JwtAuthGuard,
     NestJsJwtService,
