@@ -1,6 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { RefreshToken } from 'src/domain/entities/auth/refresh-token.entity';
-import { JwtService } from 'src/domain/services/jwt.service';
 import { JwtPayload } from 'src/domain/interfaces/jwt-payload.interface';
 import { RefreshTokenRepository } from 'src/domain/repositories/auth/refresh-token.repository';
 import { UserRepository } from 'src/domain/repositories/auth/user.repository';
@@ -8,6 +7,7 @@ import {
   RefreshTokenRequestDto,
   RefreshTokenResponseDto,
 } from 'src/application/dtos/user.dtos';
+import { NestJsJwtService } from 'src/infrastructure/services/nest-jwt.service';
 
 @Injectable()
 export class RefreshTokenUseCase {
@@ -15,7 +15,7 @@ export class RefreshTokenUseCase {
     @Inject('RefreshTokenRepository')
     private readonly refreshTokenRepository: RefreshTokenRepository,
     @Inject('UserRepository') private readonly userRepository: UserRepository,
-    @Inject('JwtService') private readonly jwtService: JwtService,
+    @Inject('JwtService') private readonly jwtService: NestJsJwtService,
   ) {}
 
   async execute(
@@ -26,7 +26,7 @@ export class RefreshTokenUseCase {
     try {
       payload = this.jwtService.verifyRefreshToken(request.refreshToken);
     } catch {
-      throw new Error('Invalid refresh token');
+      throw new UnauthorizedException('Invalid refresh token');
     }
 
     // Find refresh token in database
@@ -34,13 +34,13 @@ export class RefreshTokenUseCase {
       request.refreshToken,
     );
     if (!refreshToken || !refreshToken.isValid()) {
-      throw new Error('Invalid or expired refresh token');
+      throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
     // Find user
     const user = await this.userRepository.findById(payload.sub);
     if (!user) {
-      throw new Error('User not found');
+      throw new UnauthorizedException('User not found');
     }
 
     // Revoke old refresh token

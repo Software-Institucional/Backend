@@ -112,7 +112,7 @@ export class AuthController {
 
     // Configuración de cookies para refreshToken
     res.cookie('refreshToken', result.refreshToken, {
-      httpOnly: false,
+      httpOnly: true,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
@@ -158,25 +158,9 @@ export class AuthController {
 
     const cookieConfig = this.getCookieConfig(req);
 
-    // Limpia las cookies antiguas antes de establecer las nuevas
-    res.clearCookie('refreshToken', {
-      httpOnly: false,
-      secure: cookieConfig.secure,
-      sameSite: cookieConfig.sameSite,
-      path: '/',
-      domain: cookieConfig.domain,
-    });
-    res.clearCookie('accessToken', {
-      httpOnly: false,
-      secure: cookieConfig.secure,
-      sameSite: cookieConfig.sameSite,
-      path: '/',
-      domain: cookieConfig.domain,
-    });
-
     // Configuración de cookies para refreshToken
     res.cookie('refreshToken', result.refreshToken, {
-      httpOnly: false,
+      httpOnly: true,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
       path: '/',
