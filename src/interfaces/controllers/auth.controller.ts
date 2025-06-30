@@ -35,7 +35,6 @@ import {
   AllUsersBySchoolResponseDto,
   UpdateUserRequestDto,
   UpdateUserResponseDto,
-  RefreshTokenRequestDto,
 } from 'src/application/dtos/user.dtos';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from 'src/infrastructure/guards/jwt.auth.guard';
@@ -134,10 +133,9 @@ export class AuthController {
     return result;
   }
 
-  @Post('refresh')
+  @Get('refresh')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh access token' })
-  @ApiBody({ type: RefreshTokenRequestDto })
   @ApiResponse({
     status: 200,
     description: 'Token refreshed successfully',
@@ -145,15 +143,18 @@ export class AuthController {
   })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
   async refresh(
-    @Body() body: RefreshTokenRequestDto,
+    @Req() req: RequestWithCookies,
     @Res({ passthrough: true }) res: Response,
-    @Req() req: Request,
   ) {
-    const { refreshToken } = body;
+    const refreshToken = req.cookies?.refreshToken;
+
     if (!refreshToken) {
-      throw new UnauthorizedException('Refresh token not provided');
+      throw new UnauthorizedException('Refresh token not found in cookies');
     }
-    const result = await this.refreshTokenUseCase.execute({ refreshToken });
+
+    const result = await this.refreshTokenUseCase.execute({
+      refreshToken,
+    });
 
     const cookieConfig = this.getCookieConfig(req);
 
