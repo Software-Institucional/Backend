@@ -159,6 +159,7 @@ export class AuthController {
     const result = await this.refreshTokenUseCase.execute({
       refreshToken,
     });
+    const cookieConfig = this.getCookieConfig(req);
 
     // Configuración de cookies para refreshToken
     res.cookie('refreshToken', result.refreshToken, {
@@ -166,7 +167,7 @@ export class AuthController {
       secure: true,
       sameSite: 'none',
       path: '/',
-      domain: '.eduadminsoft.shop', // <- SIEMPRE ESTE
+      domain: cookieConfig.domain,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     res.cookie('accessToken', result.accessToken, {
@@ -174,7 +175,7 @@ export class AuthController {
       secure: true,
       sameSite: 'none',
       path: '/',
-      domain: '.eduadminsoft.shop', // <- SIEMPRE ESTE
+      domain: cookieConfig.domain,
       maxAge: 1 * 60 * 1000,
     });
 
