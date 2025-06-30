@@ -64,21 +64,21 @@ export class AuthController {
   ) {}
 
   private getCookieConfig(req: Request) {
-    // Analizar el dominio a partir del "Host" o el "Origin" de la request
     const origin = req.headers.origin || req.headers.host || '';
     let domain: string | undefined = undefined;
 
-    if (origin.includes('.eduadminsoft.shop')) {
-      // Producción: poner el dominio principal
-      domain = '.eduadminsoft.shop';
+    if (
+      origin.includes('.eduadminsoft.shop') ||
+      origin.includes('www.eduadminsoft.shop')
+    ) {
+      domain = '.eduadminsoft.shop'; // Solo para prod
     }
-    // Si no incluye el dominio de producción (localhost, staging, etc.) no pone dominio.
-    // Así la cookie queda restringida a ese entorno automáticamente.
+    // Si es localhost o cualquier otro, NO pongas el dominio (queda undefined)
 
     return {
       secure: true,
       sameSite: 'none' as const,
-      domain,
+      domain, // <--- undefined en local, bien en prod
     };
   }
 
