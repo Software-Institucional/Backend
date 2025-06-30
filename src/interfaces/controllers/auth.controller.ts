@@ -85,8 +85,13 @@ export class AuthController {
   private getCookieConfig(req: Request) {
     const origin = req.headers.origin || req.headers.host || '';
     const isProduction = process.env.NODE_ENV === 'production';
+
+    // Detectar si es localhost (desarrollo)
     const isLocalhost =
-      origin.includes('localhost') || origin.includes('127.0.0.1');
+      origin.includes('localhost') ||
+      origin.includes('127.0.0.1') ||
+      req.headers.host?.includes('localhost') ||
+      req.headers.host?.includes('127.0.0.1');
 
     let domain: string | undefined = undefined;
     let secure = false;
@@ -103,10 +108,25 @@ export class AuthController {
       sameSite = 'none'; // For cross-site requests
     } else if (isLocalhost) {
       // Local development configuration
-      domain = undefined; // Don't set domain for localhost
-      secure = false; // HTTP in development
-      sameSite = 'lax'; // More permissive for development
+      domain = undefined; // CRÍTICO: No establecer dominio para localhost
+      secure = false; // HTTP en desarrollo
+      sameSite = 'lax'; // Más permisivo para desarrollo
+    } else {
+      // Fallback para otros casos
+      domain = undefined;
+      secure = false;
+      sameSite = 'lax';
     }
+
+    console.log('Cookie config:', {
+      origin,
+      host: req.headers.host,
+      isLocalhost,
+      isProduction,
+      domain,
+      secure,
+      sameSite,
+    });
 
     return {
       secure,
