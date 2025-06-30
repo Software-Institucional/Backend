@@ -158,6 +158,22 @@ export class AuthController {
 
     const cookieConfig = this.getCookieConfig(req);
 
+    // Limpia las cookies antiguas antes de establecer las nuevas
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: cookieConfig.secure,
+      sameSite: cookieConfig.sameSite,
+      path: '/',
+      domain: cookieConfig.domain,
+    });
+    res.clearCookie('accessToken', {
+      httpOnly: false,
+      secure: cookieConfig.secure,
+      sameSite: cookieConfig.sameSite,
+      path: '/',
+      domain: cookieConfig.domain,
+    });
+
     // Configuración de cookies para refreshToken
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
