@@ -64,17 +64,21 @@ export class AuthController {
   ) {}
 
   private getCookieConfig(req: Request) {
-    const origin = req.headers.origin || '';
-    const allowedOrigins = [
-      'https://www.eduadminsoft.shop',
-      'https://eduadminsoft.shop',
-    ];
-    const isProduction = allowedOrigins.includes(origin);
+    // Analizar el dominio a partir del "Host" o el "Origin" de la request
+    const origin = req.headers.origin || req.headers.host || '';
+    let domain: string | undefined = undefined;
+
+    if (origin.includes('.eduadminsoft.shop')) {
+      // Producción: poner el dominio principal
+      domain = '.eduadminsoft.shop';
+    }
+    // Si no incluye el dominio de producción (localhost, staging, etc.) no pone dominio.
+    // Así la cookie queda restringida a ese entorno automáticamente.
 
     return {
-      secure: true, // Requerido para SameSite=None
-      sameSite: 'none' as const, // Requerido para cross-site
-      domain: isProduction ? '.eduadminsoft.shop' : undefined,
+      secure: true,
+      sameSite: 'none' as const,
+      domain,
     };
   }
 
