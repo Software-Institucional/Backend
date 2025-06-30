@@ -63,22 +63,42 @@ export class AuthController {
     private readonly updateUserUseCase: UpdateUserUseCase,
   ) {}
 
+  // private getCookieConfig(req: Request) {
+  //   const origin = req.headers.origin || req.headers.host || '';
+  //   let domain: string | undefined = undefined;
+
+  //   if (
+  //     origin.includes('.eduadminsoft.shop') ||
+  //     origin.includes('www.eduadminsoft.shop')
+  //   ) {
+  //     domain = '.eduadminsoft.shop'; // Solo para prod
+  //   }
+  //   // Si es localhost o cualquier otro, NO pongas el dominio (queda undefined)
+
+  //   return {
+  //     secure: true,
+  //     sameSite: 'none' as const,
+  //     domain, // <--- undefined en local, bien en prod
+  //   };
+  // }
+
   private getCookieConfig(req: Request) {
     const origin = req.headers.origin || req.headers.host || '';
     let domain: string | undefined = undefined;
 
+    // SOLO pones dominio en prod, nunca en local
     if (
       origin.includes('.eduadminsoft.shop') ||
       origin.includes('www.eduadminsoft.shop')
     ) {
-      domain = '.eduadminsoft.shop'; // Solo para prod
+      domain = '.eduadminsoft.shop'; // Producción
     }
-    // Si es localhost o cualquier otro, NO pongas el dominio (queda undefined)
+    // Si es local, domain queda undefined
 
     return {
-      secure: true,
-      sameSite: 'none' as const,
-      domain, // <--- undefined en local, bien en prod
+      secure: true, // Siempre true para SameSite=None (obligatorio)
+      sameSite: 'none' as const, // Siempre none para cross-site
+      domain, // undefined en local, .eduadminsoft.shop en prod
     };
   }
 
@@ -129,7 +149,7 @@ export class AuthController {
       httpOnly: false,
       secure: cookieConfig.secure,
       sameSite: cookieConfig.sameSite,
-      maxAge: 1 * 60 * 1000, // 35 minutos
+      maxAge: 1 * 60 * 1000, // 1 dia
       path: '/',
       domain: cookieConfig.domain,
     });
@@ -176,7 +196,7 @@ export class AuthController {
       sameSite: 'none',
       path: '/',
       domain: cookieConfig.domain,
-      maxAge: 1 * 60 * 1000,
+      maxAge: 1 * 60 * 1000, // 1 dia
     });
 
     return result;
