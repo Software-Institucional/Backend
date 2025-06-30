@@ -83,55 +83,17 @@ export class AuthController {
   // }
 
   private getCookieConfig(req: Request) {
-    const origin = req.headers.origin || req.headers.host || '';
-    const isProduction = process.env.NODE_ENV === 'production';
-
-    // Detectar si es localhost (desarrollo)
-    const isLocalhost =
-      origin.includes('localhost') ||
-      origin.includes('127.0.0.1') ||
-      req.headers.host?.includes('localhost') ||
-      req.headers.host?.includes('127.0.0.1');
-
-    let domain: string | undefined = undefined;
-    let secure = false;
-    let sameSite: 'none' | 'lax' | 'strict' = 'lax';
-
-    if (
-      isProduction &&
-      (origin.includes('.eduadminsoft.shop') ||
-        origin.includes('www.eduadminsoft.shop'))
-    ) {
-      // Production configuration
-      domain = '.eduadminsoft.shop';
-      secure = true;
-      sameSite = 'none'; // For cross-site requests
-    } else if (isLocalhost) {
-      // Local development configuration
-      domain = undefined; // CRÍTICO: No establecer dominio para localhost
-      secure = false; // HTTP en desarrollo
-      sameSite = 'lax'; // Más permisivo para desarrollo
-    } else {
-      // Fallback para otros casos
-      domain = undefined;
-      secure = false;
-      sameSite = 'lax';
-    }
-
-    console.log('Cookie config:', {
-      origin,
-      host: req.headers.host,
-      isLocalhost,
-      isProduction,
-      domain,
-      secure,
-      sameSite,
-    });
+    const origin = req.headers.origin || '';
+    const allowedOrigins = [
+      'https://www.eduadminsoft.shop',
+      'https://eduadminsoft.shop',
+    ];
+    const isProduction = allowedOrigins.includes(origin);
 
     return {
-      secure,
-      sameSite,
-      domain,
+      secure: true, // Requerido para SameSite=None
+      sameSite: 'none' as const, // Requerido para cross-site
+      domain: isProduction ? '.eduadminsoft.shop' : undefined,
     };
   }
 
