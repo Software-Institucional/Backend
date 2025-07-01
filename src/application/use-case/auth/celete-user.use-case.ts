@@ -4,7 +4,7 @@ import { UserRepository } from 'src/domain/repositories/auth/user.repository';
 @Injectable()
 export class DeleteUserUseCase {
   constructor(
-    @Inject('SedeRepository')
+    @Inject('UserRepository')
     private readonly userRepository: UserRepository,
   ) {}
 
