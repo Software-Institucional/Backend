@@ -4,6 +4,8 @@ import {
   FileTypeValidator,
   Get,
   MaxFileSizeValidator,
+  NotFoundException,
+  Param,
   ParseFilePipe,
   Patch,
   Post,
@@ -29,6 +31,7 @@ import {
   ApiBody,
   ApiConsumes,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiResponse,
   ApiTags,
@@ -131,5 +134,35 @@ export class SchoolController {
   ): Promise<CreateSchoolResponseDto> {
     updateSchoolDto.user = req.user as UpdateSchoolRequestDto['user'];
     return this.updateSchoolUseCase.create(updateSchoolDto, file);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Obtener colegio por ID' })
+  @ApiParam({ name: 'id', required: true, description: 'ID del colegio' })
+  @ApiResponse({
+    status: 200,
+    description: 'Colegio encontrado',
+    type: CreateSchoolResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Colegio no encontrado' })
+  async getSchoolById(
+    @Param('id') id: string,
+  ): Promise<CreateSchoolResponseDto> {
+    const school = await this.searchSchoolUseCase.findById(id);
+    if (!school) throw new NotFoundException('Colegio no encontrado');
+    return {
+      school: {
+        id: school.id,
+        name: school.name,
+        address: school.address!,
+        phone: school.phone!,
+        imgUrl: school.imgUrl!,
+        department: school.department!,
+        municipality: school.municipality!,
+        mail: school.mail!,
+        website: school.website!,
+        sedes: school.sedes!,
+      },
+    };
   }
 }

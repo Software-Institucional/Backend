@@ -3,6 +3,7 @@ import {
   SearchSchoolRequestDto,
   SearchSchoolResponseDto,
 } from 'src/application/dtos/school.dtos';
+import { School } from 'src/domain/entities/school/school.entity';
 import { SchoolRepository } from 'src/domain/repositories/school/scholl.repository';
 
 export class SearchSchoolUseCase {
@@ -53,5 +54,8 @@ export class SearchSchoolUseCase {
         totalPages,
       },
     };
+  }
+  async findById(id: string): Promise<School | null> {
+    return this.schoolRepository.findById(id);
   }
 }
