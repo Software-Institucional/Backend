@@ -4,6 +4,7 @@ import { JwtPayload } from 'src/domain/interfaces/jwt-payload.interface';
 export interface SedeDto {
   id: string;
   name: string;
+  codeDANE?: string;
   address?: string;
   phone?: string;
   createdAt: Date;
@@ -14,6 +15,8 @@ export class CreateSchoolRequestDto {
   user: JwtPayload;
   @ApiProperty({ example: 'Escuela Nacional de Ciencias' })
   name: string;
+  @ApiProperty({ example: 'Escuela Nacional de Ciencias' })
+  codeDANE: string;
   @ApiProperty({ example: 'Calle 123, Barrio Centro' })
   address: string;
   @ApiProperty({ example: '+50498765432' })
@@ -27,7 +30,7 @@ export class CreateSchoolRequestDto {
   @ApiProperty({ example: 'https://www.escuela.edu.hn' })
   website: string;
   @ApiProperty({ type: 'string', format: 'binary', required: true })
-  image: string;
+  imgUrl: string;
 }
 
 export class CreateSchoolResponseDto {
@@ -35,6 +38,7 @@ export class CreateSchoolResponseDto {
     example: {
       id: '1',
       name: 'Escuela Nacional de Ciencias',
+      codeDANE: '12113313',
       address: 'Calle 123, Barrio Centro',
       phone: '+50498765432',
       imgUrl: 'https://s3.amazonaws.com/bucket/escuela.jpg',
@@ -57,6 +61,7 @@ export class CreateSchoolResponseDto {
   school: {
     id: string;
     name: string;
+    codeDANE: string;
     address: string;
     phone: string;
     imgUrl: string;
@@ -147,6 +152,8 @@ export class UpdateSchoolRequestDto {
   user: JwtPayload;
   @ApiProperty({ example: 'Escuela Nacional de Ciencias', required: false })
   name?: string;
+  @ApiProperty({ example: '121212121', required: false })
+  codeDANE?: string;
   @ApiProperty({ example: 'Calle 123, Barrio Centro', required: false })
   address?: string;
   @ApiProperty({ example: '+50498765432', required: false })

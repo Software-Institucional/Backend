@@ -4,7 +4,7 @@ import {
   SearchSchoolResponseDto,
 } from 'src/application/dtos/school.dtos';
 import { School } from 'src/domain/entities/school/school.entity';
-import { SchoolRepository } from 'src/domain/repositories/school/scholl.repository';
+import { SchoolRepository } from 'src/domain/repositories/scholl.repository';
 
 export class SearchSchoolUseCase {
   constructor(
@@ -29,6 +29,7 @@ export class SearchSchoolUseCase {
         school: {
           id: s.id,
           name: s.name,
+          codeDANE: s.codeDANE,
           address: s.address ?? '',
           phone: s.phone ?? '',
           imgUrl: s.imgUrl ?? '',

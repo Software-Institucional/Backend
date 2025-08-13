@@ -1,20 +1,13 @@
 import * as crypto from 'crypto';
-
-export interface SedeEntity {
-  id: string;
-  name: string;
-  address?: string;
-  phone?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { SedeDto } from 'src/application/dtos/school.dtos';
 
 export class School {
-  public sedes?: SedeEntity[];
+  public sedes?: SedeDto[];
 
   constructor(
     public readonly id: string,
     public readonly name: string,
+    public readonly codeDANE?: string,
     public readonly address?: string,
     public readonly phone?: string,
     public readonly imgUrl?: string,
@@ -29,6 +22,7 @@ export class School {
 
   static create(
     name: string,
+    codeDANE?: string,
     address?: string,
     phone?: string,
     imgUrl?: string,
@@ -42,6 +36,7 @@ export class School {
     return new School(
       id,
       name,
+      codeDANE,
       address,
       phone,
       imgUrl,

@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PasswordService } from 'src/domain/services/password.service';
-import { PasswordResetRepository } from 'src/domain/repositories/auth/password-reset.repository';
-import { UserRepository } from 'src/domain/repositories/auth/user.repository';
-import { RefreshTokenRepository } from 'src/domain/repositories/auth/refresh-token.repository';
+import { PasswordResetRepository } from 'src/domain/repositories/password-reset.repository';
+import { UserRepository } from 'src/domain/repositories/user.repository';
+import { RefreshTokenRepository } from 'src/domain/repositories/refresh-token.repository';
 import {
   ResetPasswordRequestDto,
   ResetPasswordResponseDto,

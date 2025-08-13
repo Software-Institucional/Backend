@@ -5,6 +5,7 @@ import {
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
+import * as sharp from 'sharp';
 
 @Injectable()
 export class S3Service {
@@ -21,19 +22,47 @@ export class S3Service {
   }
 
   async uploadFile(file: Express.Multer.File): Promise<string> {
-    const sanitizedFileName = file.originalname
+    const allowedTypes = [
+      'image/',
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ];
+
+    const isAllowed = allowedTypes.some((type) =>
+      file.mimetype.startsWith(type),
+    );
+    if (!isAllowed) {
+      throw new Error('Tipo de archivo no permitido');
+    }
+
+    const originalFileName = file.originalname
       .trim()
       .replace(/\s+/g, '_') // Reemplaza espacios por guión bajo
       .replace(/[^\w.-]/g, ''); // Elimina caracteres raros o inseguros
 
-    const key = `entity/${uuidv4()}-${sanitizedFileName}`;
+    let bufferToUpload: Buffer = file.buffer;
+    let contentType = file.mimetype;
+    let finalFileName = originalFileName;
+
+    // Si es imagen, convertir a WebP
+    if (file.mimetype.startsWith('image/')) {
+      bufferToUpload = await sharp(file.buffer)
+        .webp({ quality: 75 })
+        .toBuffer();
+
+      contentType = 'image/webp';
+      // Cambiar solo la extensión, mantener el nombre base
+      finalFileName = originalFileName.replace(/\.[^.]+$/, '.webp');
+    }
+
+    const key = `schools/${uuidv4()}-${finalFileName}`;
 
     await this.s3.send(
       new PutObjectCommand({
         Bucket: process.env.AWS_S3_BUCKET_NAME!,
         Key: key,
-        Body: file.buffer,
-        ContentType: file.mimetype,
+        Body: bufferToUpload,
+        ContentType: contentType,
       }),
     );
 

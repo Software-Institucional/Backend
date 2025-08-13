@@ -5,8 +5,8 @@ import {
   SedesDtoResponse,
 } from 'src/application/dtos/sedes.dtos';
 import { Sede } from 'src/domain/entities/sede/sede.entity';
-import { UserRepository } from 'src/domain/repositories/auth/user.repository';
-import { SedeRepository } from 'src/domain/repositories/sede/sede.repository';
+import { UserRepository } from 'src/domain/repositories/user.repository';
+import { SedeRepository } from 'src/domain/repositories/sede.repository';
 
 @Injectable()
 export class CreateSedeUseCase {
@@ -34,14 +34,21 @@ export class CreateSedeUseCase {
       );
     }
 
+    const niveles = request.niveles.map((id) => ({ id, name: '' }));
     const sede = new Sede(
       randomUUID(),
       request.name,
       request.schoolId,
+      request.calendar,
+      request.Zone,
+      request.active,
       request.address,
       request.phone,
+      request.codeDANE,
       new Date(),
       new Date(),
+      undefined, // school
+      niveles, // <-- array de objetos { id, name }
     );
     let createdSede: Sede;
     try {
@@ -63,10 +70,15 @@ export class CreateSedeUseCase {
     }
 
     return {
+      id: createdSede.id,
       name: createdSede.name,
+      codeDANE: createdSede.name,
       address: createdSede.address,
       phone: createdSede.phone,
       schoolId: createdSede.schoolId,
+      calendar: createdSede.calendar,
+      Zone: createdSede.Zone,
+      active: createdSede.active,
     };
   }
 }

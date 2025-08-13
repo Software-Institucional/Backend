@@ -1,0 +1,10 @@
+import { UpdateSedeDto } from 'src/application/dtos/sedes.dtos';
+import { Sede } from 'src/domain/entities/sede/sede.entity';
+
+export interface SedeRepository {
+  createSede(sede: Sede): Promise<Sede>;
+  findById(id: string): Promise<Sede | null>;
+  findBySchoolId(schoolId: string): Promise<Sede[]>;
+  deleteSede(id: string): Promise<void>;
+  update(id: string, data: UpdateSedeDto): Promise<Sede>;
+}

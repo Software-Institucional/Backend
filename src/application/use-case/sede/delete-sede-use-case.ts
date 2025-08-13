@@ -1,15 +1,15 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { SedeRepository } from 'src/domain/repositories/sede/sede.repository';
+import { PrismaSedeRepository } from 'src/infrastructure/repositories/prisma-sede.repository';
 
 @Injectable()
 export class DeleteSedeUseCase {
   constructor(
-    @Inject('SedeRepository') private readonly sedeRepository: SedeRepository,
+    @Inject('SedeRepository') private readonly sedeRepo: PrismaSedeRepository,
   ) {}
 
   async execute(id: string): Promise<void> {
-    const sede = await this.sedeRepository.findById(id);
-    if (!sede) throw new NotFoundException('Sede no encontrada');
-    await this.sedeRepository.deleteSede(id);
+    const exists = await this.sedeRepo.findById(id);
+    if (!exists) throw new NotFoundException('Sede no encontrada');
+    await this.sedeRepo.deleteSede(id);
   }
 }

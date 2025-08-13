@@ -9,12 +9,12 @@ import {
   RegisterResponseDto,
 } from 'src/application/dtos/user.dtos';
 import { User } from 'src/domain/entities/auth/user.entity';
-import { UserRepository } from 'src/domain/repositories/auth/user.repository';
-import { SchoolRepository } from 'src/domain/repositories/school/scholl.repository';
-import { SedeRepository } from 'src/domain/repositories/sede/sede.repository';
+import { UserRepository } from 'src/domain/repositories/user.repository';
+import { SchoolRepository } from 'src/domain/repositories/scholl.repository';
+import { SedeRepository } from 'src/domain/repositories/sede.repository';
 import { PasswordService } from 'src/domain/services/password.service';
 import { EmailService } from 'src/domain/services/email.service';
-import { PasswordResetRepository } from 'src/domain/repositories/auth/password-reset.repository';
+import { PasswordResetRepository } from 'src/domain/repositories/password-reset.repository';
 import { Role } from '@prisma/client';
 import { PasswordReset } from 'src/domain/entities/auth/password-reset.entity';
 

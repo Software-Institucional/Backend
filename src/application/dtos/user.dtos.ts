@@ -1,5 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
+import { SedeDto } from './school.dtos';
 
 export class ForgotPasswordRequestDto {
   @ApiProperty({ example: 'usuario@email.com' })
@@ -15,7 +16,13 @@ export class ForgotPasswordResponseDto {
 
 export class LoginRequestDto {
   @ApiProperty({ example: '1' })
-  schoolId?: string;
+  schoolId: string;
+  @ApiProperty({ example: 'usuario@email.com' })
+  email: string;
+  @ApiProperty({ example: 'password123' })
+  password: string;
+}
+export class LoginSuperRequestDto {
   @ApiProperty({ example: 'usuario@email.com' })
   email: string;
   @ApiProperty({ example: 'password123' })
@@ -43,6 +50,8 @@ export class LoginResponseDto {
     lastName: string;
     role: Role;
     activate: boolean;
+    simatuser?: string | null;
+    simatpass?: string | null;
   };
 }
 
@@ -133,22 +142,49 @@ export class SchoolDto {
   updatedAt: Date;
 }
 
-export class SedeDto {
-  id: string;
-  name: string;
-  address?: string;
-  phone?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 export class AllUserRequestDto {
+  @ApiPropertyOptional({
+    description: 'Búsqueda por nombre, apellido o email',
+    example: 'Juan',
+  })
   search?: string;
+
+  @ApiPropertyOptional({
+    enum: ['SUPER', 'ADMIN', 'DOCENTE'],
+    description: 'Filtrar por rol de usuario',
+  })
   role?: Role;
+
+  @ApiPropertyOptional({
+    description: 'Filtrar si el usuario está activo',
+    example: true,
+  })
   activate?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Filtrar si el usuario tiene email verificado',
+    example: true,
+  })
   isEmailVerified?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'ID del colegio',
+    example: 'uuid-school',
+  })
   schoolId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Página de paginación',
+    example: 1,
+    default: 1,
+  })
   page?: number;
+
+  @ApiPropertyOptional({
+    description: 'Límite de resultados por página',
+    example: 10,
+    default: 10,
+  })
   limit?: number;
 }
 
@@ -200,10 +236,6 @@ export class AllUserResponseDto {
       page: 1,
       limit: 10,
       totalPages: 5,
-      totalUsers: 50,
-      docentes: 30,
-      activos: 40,
-      cantidadSedes: 8,
     },
   })
   metadata: {
@@ -211,10 +243,6 @@ export class AllUserResponseDto {
     page: number;
     limit: number;
     totalPages: number;
-    totalUsers: number;
-    docentes: number;
-    activos: number;
-    cantidadSedes: number;
   };
 }
 
@@ -278,6 +306,19 @@ export class AllUsersBySchoolResponseDto {
     limit: number;
     totalPages: number;
   };
+}
+
+export class UserMetadataResponseDto {
+  @ApiProperty()
+  total: number;
+  @ApiProperty()
+  totalUsers: number;
+  @ApiProperty()
+  activos: number;
+  @ApiProperty()
+  docentes: number;
+  @ApiProperty()
+  cantidadSedes: number;
 }
 
 export class UpdateUserRequestDto {
@@ -348,4 +389,47 @@ export class UpdateUserResponseDto {
 
 export class DeleteResponseDto {
   message: string;
+}
+
+export class UpdateMyProfileDto {
+  @ApiPropertyOptional({ description: 'Nuevo nombre', example: 'Juan' })
+  firstName?: string;
+
+  @ApiPropertyOptional({ description: 'Nuevo apellido', example: 'Pérez' })
+  lastName?: string;
+
+  // No incluyas imgUrl aquí, porque la imagen se sube como archivo (file)
+  @ApiPropertyOptional({
+    description: 'Contraseña actual (para cambiar password)',
+  })
+  currentPassword?: string;
+
+  @ApiPropertyOptional({ description: 'Nueva contraseña' })
+  newPassword?: string;
+  @ApiPropertyOptional({ description: 'username Simat' })
+  simatuser?: string;
+  @ApiPropertyOptional({ description: 'simatpass Simat' })
+  simatpass?: string;
+  @ApiPropertyOptional({ description: 'simatpass Simat' })
+  imgUrl?: string;
+}
+
+export class MyProfileResponseDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  email: string;
+
+  @ApiProperty()
+  firstName: string;
+
+  @ApiProperty()
+  lastName: string;
+
+  @ApiProperty({ required: false })
+  imgUrl?: string;
+
+  @ApiProperty({ enum: Role })
+  role: Role;
 }

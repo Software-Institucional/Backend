@@ -2,6 +2,7 @@ import {
   Injectable,
   type ExecutionContext,
   UnauthorizedException,
+  Inject,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import type { Request } from 'express';
@@ -16,7 +17,9 @@ interface RequestWithCookies extends Request {
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(private readonly jwtService: NestJsJwtService) {
+  constructor(
+    @Inject('JwtService') private readonly jwtService: NestJsJwtService,
+  ) {
     super();
   }
 

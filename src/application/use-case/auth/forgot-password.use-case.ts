@@ -4,8 +4,8 @@ import {
   ForgotPasswordResponseDto,
 } from 'src/application/dtos/user.dtos';
 import { PasswordReset } from 'src/domain/entities/auth/password-reset.entity';
-import { PasswordResetRepository } from 'src/domain/repositories/auth/password-reset.repository';
-import { UserRepository } from 'src/domain/repositories/auth/user.repository';
+import { PasswordResetRepository } from 'src/domain/repositories/password-reset.repository';
+import { UserRepository } from 'src/domain/repositories/user.repository';
 import { EmailService } from 'src/domain/services/email.service';
 import { PasswordService } from 'src/domain/services/password.service';
 

@@ -3,8 +3,8 @@ import {
   CreateSchoolResponseDto,
   UpdateSchoolRequestDto,
 } from 'src/application/dtos/school.dtos';
-import { UserRepository } from 'src/domain/repositories/auth/user.repository';
-import { SchoolRepository } from 'src/domain/repositories/school/scholl.repository';
+import { UserRepository } from 'src/domain/repositories/user.repository';
+import { SchoolRepository } from 'src/domain/repositories/scholl.repository';
 import { School } from 'src/domain/entities/school/school.entity';
 import { S3Service } from 'src/infrastructure/s3/s3.service';
 
@@ -55,6 +55,7 @@ export class UpdateSchoolUseCase {
     const school = new School(
       currentSchool.id,
       request.name ?? currentSchool.name,
+      request.codeDANE ?? currentSchool.codeDANE,
       request.address ?? currentSchool.address,
       request.phone ?? currentSchool.phone,
       imgUrl,
@@ -75,6 +76,7 @@ export class UpdateSchoolUseCase {
       school: {
         id: savedSchool.id,
         name: savedSchool.name ?? '',
+        codeDANE: savedSchool.codeDANE ?? '',
         address: savedSchool.address ?? '',
         phone: savedSchool.phone ?? '',
         imgUrl: savedSchool.imgUrl ?? '',

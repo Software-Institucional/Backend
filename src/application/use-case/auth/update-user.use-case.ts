@@ -10,9 +10,9 @@ import {
   UpdateUserResponseDto,
 } from 'src/application/dtos/user.dtos';
 import { User } from 'src/domain/entities/auth/user.entity';
-import { UserRepository } from 'src/domain/repositories/auth/user.repository';
-import { SchoolRepository } from 'src/domain/repositories/school/scholl.repository';
-import { SedeRepository } from 'src/domain/repositories/sede/sede.repository';
+import { UserRepository } from 'src/domain/repositories/user.repository';
+import { SchoolRepository } from 'src/domain/repositories/scholl.repository';
+import { SedeRepository } from 'src/domain/repositories/sede.repository';
 import { JwtPayload } from 'src/domain/interfaces/jwt-payload.interface';
 
 interface UpdateUserUseCaseRequest extends UpdateUserRequestDto {

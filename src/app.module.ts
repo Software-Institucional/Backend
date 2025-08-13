@@ -6,6 +6,10 @@ import { AuthModule } from './module/auth.module';
 import { SchoolModule } from './module/school.module';
 import { SedeModule } from './module/sede.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { UserModule } from './module/user.module';
+import { SimatModule } from './module/simat.module';
+import { GradoSedeModule } from './module/grado-sede.module';
+import { CursoModule } from './module/curso.module';
 
 @Module({
   imports: [
@@ -22,6 +26,10 @@ import { ScheduleModule } from '@nestjs/schedule';
     AuthModule,
     SchoolModule,
     SedeModule,
+    UserModule,
+    CursoModule,
+    SimatModule,
+    GradoSedeModule,
     ScheduleModule.forRoot(),
   ],
   controllers: [],

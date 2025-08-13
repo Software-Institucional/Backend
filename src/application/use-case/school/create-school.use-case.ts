@@ -3,8 +3,8 @@ import {
   CreateSchoolRequestDto,
   CreateSchoolResponseDto,
 } from 'src/application/dtos/school.dtos';
-import { UserRepository } from 'src/domain/repositories/auth/user.repository';
-import { SchoolRepository } from 'src/domain/repositories/school/scholl.repository';
+import { UserRepository } from 'src/domain/repositories/user.repository';
+import { SchoolRepository } from 'src/domain/repositories/scholl.repository';
 import { School } from 'src/domain/entities/school/school.entity';
 import { S3Service } from 'src/infrastructure/s3/s3.service';
 
@@ -60,6 +60,7 @@ export class CreateSchoolUseCase {
       school: {
         id: savedSchool.id,
         name: savedSchool.name,
+        codeDANE: savedSchool.codeDANE!,
         address: savedSchool.address!,
         phone: savedSchool.phone!,
         imgUrl: savedSchool.imgUrl!,

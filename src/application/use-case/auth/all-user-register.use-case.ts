@@ -8,9 +8,10 @@ import {
   AllUserRequestDto,
   AllUserResponseDto,
   AllUsersBySchoolResponseDto,
+  UserMetadataResponseDto,
 } from 'src/application/dtos/user.dtos';
 import { JwtPayload } from 'src/domain/interfaces/jwt-payload.interface';
-import { UserRepository } from 'src/domain/repositories/auth/user.repository';
+import { UserRepository } from 'src/domain/repositories/user.repository';
 
 @Injectable()
 export class AllUSerUseCase {
@@ -91,12 +92,6 @@ export class AllUSerUseCase {
     );
 
     const totalPages = Math.ceil(total / limit);
-    const totalUsers = total;
-    const docentes = users.filter((u) => u.role === 'DOCENTE').length;
-    const activos = users.filter((u) => u.activate).length;
-    const cantidadSedes = new Set(
-      users.filter((u) => u.sede && u.sede.id).map((u) => u.sede?.id),
-    ).size;
 
     return {
       users: users.map((u) => ({
@@ -124,11 +119,72 @@ export class AllUSerUseCase {
         page,
         limit,
         totalPages,
-        totalUsers,
-        docentes,
-        activos,
-        cantidadSedes,
       },
+    };
+  }
+
+  async getUserMetadata(
+    request: { user: JwtPayload } & AllUserRequestDto,
+  ): Promise<UserMetadataResponseDto> {
+    const userId = request.user.sub;
+    if (!userId) throw new Error('User not found');
+    const user = await this.userRepository.findById(userId);
+    if (!user) throw new UnauthorizedException('Credenciales inválidas');
+
+    if (user.role !== 'ADMIN' && user.role !== 'SUPER') {
+      throw new UnauthorizedException(
+        'No tienes permiso para acceder a este recurso.',
+      );
+    }
+
+    let activate: boolean | undefined = undefined;
+    if (typeof request.activate === 'boolean') activate = request.activate;
+    else if (request.activate === 'true' || request.activate === 'false')
+      activate = request.activate === 'true';
+
+    let isEmailVerified: boolean | undefined = undefined;
+    if (typeof request.isEmailVerified === 'boolean')
+      isEmailVerified = request.isEmailVerified;
+    else if (
+      request.isEmailVerified === 'true' ||
+      request.isEmailVerified === 'false'
+    )
+      isEmailVerified = request.isEmailVerified === 'true';
+
+    const schoolId = request.schoolId;
+    if (!schoolId)
+      throw new BadRequestException('El parámetro schoolId es obligatorio.');
+
+    let createdById: string | undefined = undefined;
+    if (user.role === 'ADMIN') createdById = user.id;
+
+    // Traer todos los usuarios (sin paginación)
+    const { users } = await this.userRepository.searchUsersWithFilters(
+      request.search,
+      request.role,
+      schoolId,
+      1,
+      10000, // max results para evitar paginación
+      createdById,
+      activate,
+      isEmailVerified,
+    );
+
+    // Calcular metadata
+    const total = users.length;
+    const totalUsers = total;
+    const docentes = users.filter((u) => u.role === 'DOCENTE').length;
+    const activos = users.filter((u) => u.activate).length;
+    const cantidadSedes = new Set(
+      users.filter((u) => u.sede && u.sede.id).map((u) => u.sede?.id),
+    ).size;
+
+    return {
+      total,
+      totalUsers,
+      docentes,
+      activos,
+      cantidadSedes,
     };
   }
 }

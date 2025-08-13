@@ -1,8 +1,8 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { RefreshToken } from 'src/domain/entities/auth/refresh-token.entity';
 import { JwtPayload } from 'src/domain/interfaces/jwt-payload.interface';
-import { RefreshTokenRepository } from 'src/domain/repositories/auth/refresh-token.repository';
-import { UserRepository } from 'src/domain/repositories/auth/user.repository';
+import { RefreshTokenRepository } from 'src/domain/repositories/refresh-token.repository';
+import { UserRepository } from 'src/domain/repositories/user.repository';
 import {
   RefreshTokenRequestDto,
   RefreshTokenResponseDto,

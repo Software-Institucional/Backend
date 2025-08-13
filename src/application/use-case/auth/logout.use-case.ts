@@ -3,7 +3,7 @@ import {
   LogoutRequestDto,
   LogoutResponseDto,
 } from 'src/application/dtos/user.dtos';
-import { RefreshTokenRepository } from 'src/domain/repositories/auth/refresh-token.repository';
+import { RefreshTokenRepository } from 'src/domain/repositories/refresh-token.repository';
 
 @Injectable()
 export class LogoutUseCase {

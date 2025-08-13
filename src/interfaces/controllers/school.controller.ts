@@ -154,6 +154,7 @@ export class SchoolController {
       school: {
         id: school.id,
         name: school.name,
+        codeDANE: school.codeDANE!,
         address: school.address!,
         phone: school.phone!,
         imgUrl: school.imgUrl!,

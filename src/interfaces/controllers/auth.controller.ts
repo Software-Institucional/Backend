@@ -38,6 +38,8 @@ import {
   UpdateUserRequestDto,
   UpdateUserResponseDto,
   DeleteResponseDto,
+  LoginSuperRequestDto,
+  UserMetadataResponseDto,
 } from 'src/application/dtos/user.dtos';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from 'src/infrastructure/guards/jwt.auth.guard';
@@ -104,7 +106,7 @@ export class AuthController {
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Register a new user' })
+  @ApiOperation({ summary: 'Registrar un nuevo usuario' })
   @ApiBody({ type: RegisterRequestDto })
   @ApiResponse({
     status: 200,
@@ -118,7 +120,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Login user' })
+  @ApiOperation({ summary: 'Iniciar sesión de usuario' })
   @ApiBody({ type: LoginRequestDto })
   @ApiResponse({
     status: 200,
@@ -157,9 +159,50 @@ export class AuthController {
     return result;
   }
 
+  @Post('login-super')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Iniciar sesión como SUPER' })
+  @ApiBody({ type: LoginSuperRequestDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful',
+    type: LoginResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  async loginSuper(
+    @Body() request: LoginSuperRequestDto,
+    @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
+  ) {
+    const result = await this.loginUseCase.SuperExecute(request);
+    const cookieConfig = this.getCookieConfig(req);
+
+    // Configuración de cookies para refreshToken
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: cookieConfig.secure,
+      sameSite: cookieConfig.sameSite,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+      path: '/',
+      domain: cookieConfig.domain,
+    });
+
+    // Configuración de cookies para accessToken
+    res.cookie('accessToken', result.accessToken, {
+      httpOnly: false,
+      secure: cookieConfig.secure,
+      sameSite: cookieConfig.sameSite,
+      maxAge: 1 * 24 * 60 * 1000, // 1 dia
+      path: '/',
+      domain: cookieConfig.domain,
+    });
+
+    return result;
+  }
+
   @Get('refresh')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiOperation({ summary: 'Refrescar token de acceso' })
   @ApiResponse({
     status: 200,
     description: 'Token refreshed successfully',
@@ -204,7 +247,7 @@ export class AuthController {
 
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Request password reset' })
+  @ApiOperation({ summary: 'Solicitar restablecimiento de contraseña' })
   @ApiBody({ type: ForgotPasswordRequestDto })
   @ApiResponse({
     status: 200,
@@ -217,7 +260,7 @@ export class AuthController {
 
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Reset password' })
+  @ApiOperation({ summary: 'Restablecer contraseña' })
   @ApiBody({ type: ResetPasswordRequestDto })
   @ApiResponse({
     status: 200,
@@ -231,7 +274,7 @@ export class AuthController {
 
   @Get('logout')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Logout user' })
+  @ApiOperation({ summary: 'Cerrar sesión de usuario' })
   @ApiResponse({
     status: 200,
     description: 'Logout successful',
@@ -272,7 +315,7 @@ export class AuthController {
   @Get('view-registered')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'View users registered by the current user' })
+  @ApiOperation({ summary: 'Ver usuarios registrados por el usuario actual' })
   @ApiResponse({
     status: 200,
     description: 'List of registered users',
@@ -286,10 +329,27 @@ export class AuthController {
     return this.allUserUseCase.allUser({ user: req.user, ...query });
   }
 
+  @Get('user-metadata')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obtener solo metadata de usuarios (estadísticas)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Metadata (estadísticas) de usuarios',
+    type: UserMetadataResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getUserMetadata(
+    @Req() req: Request & { user: JwtPayload },
+    @Query() query: AllUserRequestDto,
+  ): Promise<UserMetadataResponseDto> {
+    return this.allUserUseCase.getUserMetadata({ user: req.user, ...query });
+  }
+
   @Put('update-user')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Update user data' })
+  @ApiOperation({ summary: 'Actualizar datos de usuario' })
   @ApiBody({ type: UpdateUserRequestDto })
   @ApiResponse({
     status: 200,

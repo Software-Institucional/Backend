@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import type { JwtService as IJwtService } from '../../domain/services/jwt.service';
 import { JwtPayload } from '../../domain/interfaces/jwt-payload.interface';
+import { TokenExpiredError } from 'jsonwebtoken';
 
 @Injectable()
 export class NestJsJwtService implements IJwtService {
@@ -26,9 +27,18 @@ export class NestJsJwtService implements IJwtService {
   }
 
   verifyAccessToken(token: string): JwtPayload {
-    return this.jwtService.verify<JwtPayload>(token, {
-      secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-    });
+    try {
+      return this.jwtService.verify<JwtPayload>(token, {
+        secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+      });
+    } catch (error) {
+      if (error instanceof TokenExpiredError) {
+        throw new UnauthorizedException(
+          'El token ha expirado. Por favor, inicia sesión nuevamente.',
+        );
+      }
+      throw new UnauthorizedException('Token inválido o no autorizado.');
+    }
   }
 
   verifyRefreshToken(token: string): JwtPayload {

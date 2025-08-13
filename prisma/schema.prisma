@@ -14,27 +14,30 @@ enum Role {
 }
 
 model User {
-  id              String   @id @default(uuid())
-  email           String   @unique
+  id              String         @id @default(uuid())
+  email           String         @unique
   password        String
   firstName       String
   role            Role
   lastName        String
-  isEmailVerified Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt()
-  activate        Boolean  @default(true)
+  imgUrl          String?
+  isEmailVerified Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt()
+  activate        Boolean        @default(true)
   createdById     String?
   schoolId        String?
   sedeId          String?
-
-  RefreshToken RefreshToken[]
+  simatuser       String?
+  simatpass       String?
+  RefreshToken    RefreshToken[]
 
   school School? @relation(fields: [schoolId], references: [id])
   sede   Sede?   @relation(fields: [sedeId], references: [id])
 
   createdBy    User?  @relation("UserCreations", fields: [createdById], references: [id])
   createdUsers User[] @relation("UserCreations")
+  // SubjectOnCourse SubjectOnCourse[]
 }
 
 model RefreshToken {
@@ -65,6 +68,7 @@ model PasswordReset {
 model School {
   id           String  @id @default(uuid())
   name         String
+  codeDANE     String?
   address      String?
   phone        String?
   imgUrl       String?
@@ -84,13 +88,180 @@ model School {
 model Sede {
   id       String  @id @default(uuid())
   name     String
+  codeDANE String?
   address  String?
   phone    String?
   schoolId String
   users    User[]
+  calendar String
+  Zone     String
+  active   Boolean @default(true)
   school   School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userId    String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  gradoSede  GradoSede[]
+  SedeNivel  SedeNivel[]
+  Enrollment Enrollment[]
 }
+
+model Students {
+  id                  String       @id @default(uuid())
+  tipoID              String
+  numero              String       @unique
+  primerNombre        String
+  segundoNombre       String?
+  primerApellido      String
+  segundoApellido     String?
+  genero              String
+  fechaNacimiento     DateTime
+  direccionResidencia String?
+  barrioResidencia    String?
+  deptResidencia      String?
+  munResidencia       String?
+  zona                String?
+  telefono            String?
+  email               String?
+  sisbenIV            String?
+  sisbenIVCat         String?
+  estrato             String?
+  rh                  String?
+  epsAfiliado         String?
+  etnia               String?
+  victimaConflicto    Boolean?     @default(false)
+  madreCabeza         Boolean?     @default(false)
+  beneficiarioHeroe   Boolean?     @default(false)
+  nacionalidad        String?
+  especialidad        String?
+  // enrollments         Enrollment[]
+  familiares          Familiar[]
+  Enrollment          Enrollment[]
+}
+
+model Familiar {
+  id            String   @id @default(uuid())
+  estudianteId  String
+  estudiante    Students @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  nombre        String
+  parentesco    String
+  acudiente     Boolean
+  tipoDocumento String
+  documento     String
+  telefono      String?
+  correo        String?
+}
+
+model Nivel {
+  id        String      @id @default(uuid())
+  name      String
+  grados    Grado[]
+  GradoSede GradoSede[]
+  SedeNivel SedeNivel[]
+}
+
+model SedeNivel {
+  id      String @id @default(uuid())
+  sedeId  String
+  nivelId String
+  sede    Sede   @relation(fields: [sedeId], references: [id])
+  nivel   Nivel  @relation(fields: [nivelId], references: [id])
+}
+
+model Grado {
+  id        String      @id @default(uuid())
+  name      String
+  nivelId   String
+  nivel     Nivel       @relation(fields: [nivelId], references: [id])
+  GradoSede GradoSede[]
+}
+
+model GradoSede {
+  id         String       @id @default(uuid())
+  name       String // Ej: "Primero", "CLEI", etc.
+  sedeId     String
+  nivelId    String
+  gradoId    String? // nulo si es personalizado
+  activo     Boolean      @default(true)
+  sede       Sede         @relation(fields: [sedeId], references: [id])
+  nivel      Nivel        @relation(fields: [nivelId], references: [id])
+  grado      Grado?       @relation(fields: [gradoId], references: [id])
+  salones    Salones[]
+  custom     Boolean      @default(false)
+  Enrollment Enrollment[]
+}
+
+model Salones {
+  id           String       @id @default(uuid())
+  name         String
+  codeOfficial Int
+  gradoSedeId  String
+  activo       Boolean      @default(true)
+  gradoSede    GradoSede    @relation(fields: [gradoSedeId], references: [id])
+  Enrollment   Enrollment[]
+}
+
+model AcademicYear {
+  id          String       @id @default(uuid())
+  year        Int
+  active      Boolean      @default(false)
+  startAt     DateTime
+  endAt       DateTime
+  enrollments Enrollment[]
+}
+
+model Enrollment {
+  id           String    @id @default(uuid())
+  estudianteId String
+  gradoSedeId  String?
+  salonId      String?
+  yearId       String
+  status       String // "MATRICULADO", "RETIRADO", etc.
+  sedeId       String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime?
+
+  estudiante Students     @relation(fields: [estudianteId], references: [id])
+  year       AcademicYear @relation(fields: [yearId], references: [id])
+  gradoSede  GradoSede?   @relation(fields: [gradoSedeId], references: [id])
+  salon      Salones?     @relation(fields: [salonId], references: [id])
+  sede       Sede?        @relation(fields: [sedeId], references: [id])
+}
+
+// model Subject {
+//   id                String            @id @default(uuid())
+//   name              String
+//   subjectsOnCourses SubjectOnCourse[]
+// }
+
+// model SubjectOnCourse {
+//   id        String       @id @default(uuid())
+//   subjectId String
+//   courseId  String
+//   yearId    String
+//   teacherId String? // <--- User (rol: DOCENTE)
+//   subject   Subject      @relation(fields: [subjectId], references: [id])
+//   course    Course       @relation(fields: [courseId], references: [id])
+//   year      AcademicYear @relation(fields: [yearId], references: [id])
+//   teacher   User?        @relation(fields: [teacherId], references: [id])
+//   grades    Grade[]
+// }
+
+// model Period {
+//   id     String  @id @default(uuid())
+//   name   String // "Primer periodo"
+//   order  Int
+//   grades Grade[]
+// }
+
+// model Grade {
+//   id                String   @id @default(uuid())
+//   enrollmentId      String
+//   subjectOnCourseId String
+//   periodId          String
+//   value             Float
+//   createdAt         DateTime @default(now())
+
+//   enrollment      Enrollment      @relation(fields: [enrollmentId], references: [id])
+//   subjectOnCourse SubjectOnCourse @relation(fields: [subjectOnCourseId], references: [id])
+//   period          Period          @relation(fields: [periodId], references: [id])
+// }
